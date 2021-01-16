@@ -16,7 +16,7 @@ class Window(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)   
         self.infile = tk.StringVar()
-        self.infile.set('')
+        #self.infile.set()
         self.outfile = tk.StringVar()
         self.outfile.set('')
         self.parent = parent  
@@ -48,10 +48,11 @@ class Window(tk.Frame):
         tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
 
 
-    def openFile(self):
+    def openFile(self, label):
         ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
         tmp = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
         self.infile.set(tmp)
+        label.configure(text=tmp)
         print(self.infile.get())
         if tmp != '':
             self.inData = self.readFile(tmp)
@@ -84,16 +85,16 @@ class Window(tk.Frame):
         self.txt = tk.Text(self)
         self.txt.pack(fill=tk.BOTH, expand=1)
         
-        # Open file button
-        openButton = tk.Button(self.parent, text="Open")
-        openButton.bind("<Button>", lambda e: self.openFile()) 
-        openButton.pack(side=tk.LEFT)
+        
 
         # Opened file path
-        openLabel = tk.Label(self.parent, text=self.infile)
+        openLabel = tk.Label(self.parent, text='Here is the path')
         openLabel.pack(side=tk.RIGHT)
 
-
+        # Open file button
+        openButton = tk.Button(self.parent, text="Open")
+        openButton.bind("<Button>", lambda e: self.openFile(openLabel)) 
+        openButton.pack(side=tk.LEFT)
 
 
 
