@@ -8,15 +8,55 @@ Created on Sun Jan 10 16:33:44 2021
 
 #from tkinter import Frame, Tk, BOTH, Text, Menu, END
 import tkinter as tk
-#from tkinter import filedialog
+from tkinter import filedialog
+import pandas as pd
 
 class Window(tk.Frame):
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)   
-
-        self.parent = parent        
+        self.infile = tk.StringVar()
+        self.infile.set('')
+        self.outfile = tk.StringVar()
+        self.outfile.set('')
+        self.parent = parent  
+        self.inData = pd.DataFrame()
         self.initUI()
+
+    def onOpen(self):
+
+        ftypes = [('CSV files', '*.csv'), ('Dat files', '*.dat'), ('Text files', '*.txt'), ('All files', '*')]
+        dlg = tk.filedialog.Open(self, filetypes = ftypes)
+        fl = dlg.show()
+
+        if fl != '':
+            text = self.readFile(fl)
+            self.txt.insert(END, text)
+
+    def readFile(self, filename, msep=' '):
+
+        '''f = open(filename, "r")
+        text = f.read()
+        return text'''
+        data = pd.read_csv(filename, sep=' ', encoding='utf8')
+        return data
+    
+    def aboutMenu(self):
+        tk.messagebox.showinfo("About", "This software has been created by Konstantinos Angelou!\nemail: angelou.konstantinos@gmail.com")
+    
+    def helpMenu(self):
+        tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
+
+
+    def openFile(self):
+        ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
+        tmp = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+        self.infile.set(tmp)
+        print(self.infile.get())
+        if tmp != '':
+            self.inData = self.readFile(tmp)
+            print(self.inData)
+
 
     def initUI(self):
 
@@ -43,29 +83,18 @@ class Window(tk.Frame):
 
         self.txt = tk.Text(self)
         self.txt.pack(fill=tk.BOTH, expand=1)
+        
+        # Open file button
+        openButton = tk.Button(self.parent, text="Open")
+        openButton.bind("<Button>", lambda e: self.openFile()) 
+        openButton.pack(side=tk.LEFT)
+
+        # Opened file path
+        openLabel = tk.Label(self.parent, text=self.infile)
+        openLabel.pack(side=tk.RIGHT)
 
 
-    def onOpen(self):
 
-        ftypes = [('CSV files', '*.csv'), ('Dat files', '*.dat'), ('Text files', '*.txt'), ('All files', '*')]
-        dlg = tk.filedialog.Open(self, filetypes = ftypes)
-        fl = dlg.show()
-
-        if fl != '':
-            text = self.readFile(fl)
-            self.txt.insert(END, text)
-
-    def readFile(self, filename):
-
-        f = open(filename, "r")
-        text = f.read()
-        return text
-    
-    def aboutMenu(self):
-        tk.messagebox.showinfo("About", "This software has been created by Konstantinos Angelou!\nemail: angelou.konstantinos@gmail.com")
-    
-    def helpMenu(self):
-        tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
 
 
 def main():
