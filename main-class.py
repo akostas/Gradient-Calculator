@@ -16,14 +16,12 @@ class Window(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)   
         self.infile = tk.StringVar()
-        #self.infile.set()
         self.outfile = tk.StringVar()
-        self.outfile.set('')
         self.parent = parent  
         self.inData = pd.DataFrame()
         self.initUI()
 
-    def onOpen(self):
+    '''def onOpen(self):
 
         ftypes = [('CSV files', '*.csv'), ('Dat files', '*.dat'), ('Text files', '*.txt'), ('All files', '*')]
         dlg = tk.filedialog.Open(self, filetypes = ftypes)
@@ -31,7 +29,7 @@ class Window(tk.Frame):
 
         if fl != '':
             text = self.readFile(fl)
-            self.txt.insert(END, text)
+            self.txt.insert(END, text)'''
 
     def readFile(self, filename, msep=' '):
 
@@ -58,6 +56,17 @@ class Window(tk.Frame):
             self.inData = self.readFile(tmp)
             print(self.inData)
 
+    def saveFile(self, label):
+        print('Test')
+        ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
+        tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+        self.outfile.set(tmp)
+        label.configure(text=tmp)
+        print(self.outfile.get())
+        if tmp != '':
+            self.outData = self.inData.to_csv(tmp, sep=' ', index=False)
+            print(self.inData)
+
 
     def initUI(self):
 
@@ -68,7 +77,7 @@ class Window(tk.Frame):
         self.parent.config(menu=menubar)
 
         fileMenu = tk.Menu(menubar)
-        fileMenu.add_command(label="Open", command=self.onOpen)
+        fileMenu.add_command(label="Open")
         fileMenu.add_command(label='Exit', command=self.parent.destroy)
         menubar.add_cascade(label="File", menu=fileMenu)    
         
@@ -85,8 +94,6 @@ class Window(tk.Frame):
         self.txt = tk.Text(self)
         self.txt.pack(fill=tk.BOTH, expand=1)
         
-        
-
         # Opened file path
         openLabel = tk.Label(self.parent, text='Here is the path')
         openLabel.pack(side=tk.RIGHT)
@@ -95,6 +102,15 @@ class Window(tk.Frame):
         openButton = tk.Button(self.parent, text="Open")
         openButton.bind("<Button>", lambda e: self.openFile(openLabel)) 
         openButton.pack(side=tk.LEFT)
+        
+        # Saved file path
+        saveLabel = tk.Label(self.parent, text='Here is the path of the saved file')
+        saveLabel.pack(side=tk.RIGHT)
+
+        # Saved file button
+        saveButton = tk.Button(self.parent, text="Save")
+        saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
+        saveButton.pack(side=tk.LEFT)
 
 
 
