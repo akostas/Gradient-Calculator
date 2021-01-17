@@ -12,13 +12,16 @@ from tkinter import filedialog
 import pandas as pd
 
 class Window(tk.Frame):
-
+    
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)   
-        self.infile = tk.StringVar()
-        self.outfile = tk.StringVar()
+        self.infile = tk.StringVar() # Filename of the input file
+        self.outfile = tk.StringVar() # Filename of the output file
         self.parent = parent  
-        self.inData = pd.DataFrame()
+        self.sepIn = '\t' # Separator for input file
+        self.sepOut = ';' # Separator for output file
+        self.inData = pd.DataFrame() # Container for input file
+        self.seps = {'space': ' ', 'comma': ',', 'tab': '\t', 'semicolon': ';'}
         self.initUI()
 
     '''def onOpen(self):
@@ -64,9 +67,39 @@ class Window(tk.Frame):
         label.configure(text=tmp)
         print(self.outfile.get())
         if tmp != '':
-            self.outData = self.inData.to_csv(tmp, sep=' ', index=False)
+            self.outData = self.inData.to_csv(tmp, sep=self.sepOut, index=False)
             print(self.inData)
 
+    def saveParams(self):
+        
+        def chooseSep():
+            #self.sepIn.set(s)
+            print(self.sepOut)
+        
+        window = tk.Toplevel(self.parent)
+        window.title("Save Parameters")
+        i = 0
+        label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
+        v = ' '
+        for sep, val in self.seps.items():
+            i += 1
+            tk.Radiobutton(window, text=sep, variable=self.sepOut, 
+                   value=val, command=chooseSep).grid(row=i, column=0)
+            
+        #print(self.sepIn.get())   
+               
+        '''r1 = Radiobutton(window, text="Option 1", variable=var, value=1,
+                  command=sel)
+        r1.pack( anchor = W )
+        
+        r2 = Radiobutton(root, text="Option 2", variable=var, value=2,
+                          command=sel)
+        r2.pack( anchor = W )
+        
+        r3 = Radiobutton(root, text="Option 3", variable=var, value=3,
+                          command=sel)
+        r3.pack( anchor = W)'''
+        
 
     def initUI(self):
 
@@ -115,6 +148,11 @@ class Window(tk.Frame):
         saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
         #saveButton.pack(side=tk.LEFT)
         saveButton.grid(row=2, column=0)
+
+
+        # Save parameters button
+        saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams)
+        saveParBut.grid(row=1, column=0)
 
 
 def main():
