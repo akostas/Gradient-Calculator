@@ -71,7 +71,7 @@ class Window(tk.Frame):
     def initUI(self):
 
         self.parent.title("Gradients Calculator")
-        self.pack(fill=tk.BOTH, expand=1)
+        #self.pack(fill=tk.BOTH, expand=1)
 
         menubar = tk.Menu(self.parent)
         self.parent.config(menu=menubar)
@@ -91,27 +91,30 @@ class Window(tk.Frame):
         aboutMenu.add_command(label='About', command=self.aboutMenu)
         menubar.add_cascade(label="Information", menu=aboutMenu)   
 
-        self.txt = tk.Text(self)
-        self.txt.pack(fill=tk.BOTH, expand=1)
+        #self.txt = tk.Text(self)
+        #self.txt.pack(fill=tk.BOTH, expand=1)
         
         # Opened file path
         openLabel = tk.Label(self.parent, text='Here is the path')
-        openLabel.pack(side=tk.RIGHT)
+        #openLabel.pack(side=tk.RIGHT)
+        openLabel.grid(row=0, column=1)
 
         # Open file button
         openButton = tk.Button(self.parent, text="Open")
-        openButton.bind("<Button>", lambda e: self.openFile(openLabel)) 
-        openButton.pack(side=tk.LEFT)
+        openButton.bind("<Button>", lambda e: self.openFile(openLabel))
+        #openButton.pack(side=tk.LEFT)
+        openButton.grid(row=0, column=0)
         
         # Saved file path
         saveLabel = tk.Label(self.parent, text='Here is the path of the saved file')
-        saveLabel.pack(side=tk.RIGHT)
+        #saveLabel.pack(side=tk.RIGHT)
+        saveLabel.grid(row=2, column=1)
 
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save")
         saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
-        saveButton.pack(side=tk.LEFT)
-
+        #saveButton.pack(side=tk.LEFT)
+        saveButton.grid(row=2, column=0)
 
 
 def main():
