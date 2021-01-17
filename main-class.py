@@ -18,10 +18,15 @@ class Window(tk.Frame):
         self.infile = tk.StringVar() # Filename of the input file
         self.outfile = tk.StringVar() # Filename of the output file
         self.parent = parent  
-        self.sepIn = '\t' # Separator for input file
-        self.sepOut = ';' # Separator for output file
+        #self.sepOut = ';' # Separator for output file
+        self.sepIn = tk.IntVar() # Separator for input file
+        self.sepOut = tk.IntVar() # Separator for output file
+        self.sepIn.set(0)
+        self.sepOut.set(0)
         self.inData = pd.DataFrame() # Container for input file
-        self.seps = {'space': ' ', 'comma': ',', 'tab': '\t', 'semicolon': ';'}
+        #self.sepsNames = {'space': ' ', 'comma': ',', 'tab': '\t', 'semicolon': ';'}
+        self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
+        self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         self.initUI()
 
     '''def onOpen(self):
@@ -34,12 +39,12 @@ class Window(tk.Frame):
             text = self.readFile(fl)
             self.txt.insert(END, text)'''
 
-    def readFile(self, filename, msep=' '):
+    def readFile(self, filename):
 
         '''f = open(filename, "r")
         text = f.read()
         return text'''
-        data = pd.read_csv(filename, sep=' ', encoding='utf8')
+        data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
         return data
     
     def aboutMenu(self):
@@ -57,6 +62,7 @@ class Window(tk.Frame):
         print(self.infile.get())
         if tmp != '':
             self.inData = self.readFile(tmp)
+            print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData)
 
     def saveFile(self, label):
@@ -67,38 +73,43 @@ class Window(tk.Frame):
         label.configure(text=tmp)
         print(self.outfile.get())
         if tmp != '':
-            self.outData = self.inData.to_csv(tmp, sep=self.sepOut, index=False)
+            self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+            print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData)
+
+    def openParams(self):
+        
+        def chooseSep():
+            #self.sepIn.set(s)
+            print(self.sepIn.get())
+        
+        window = tk.Toplevel(self.parent)
+        window.title("Open Parameters")
+        i = 0
+        label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
+        for sep, val in self.sepsNames.items():
+            i += 1
+            tk.Radiobutton(window, text=val, variable=self.sepIn, 
+                   value=sep, command=chooseSep).grid(row=i, column=0)
+
 
     def saveParams(self):
         
         def chooseSep():
             #self.sepIn.set(s)
-            print(self.sepOut)
+            print(self.sepOut.get())
         
         window = tk.Toplevel(self.parent)
         window.title("Save Parameters")
         i = 0
         label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
-        v = ' '
-        for sep, val in self.seps.items():
+        for sep, val in self.sepsNames.items():
             i += 1
-            tk.Radiobutton(window, text=sep, variable=self.sepOut, 
-                   value=val, command=chooseSep).grid(row=i, column=0)
+            tk.Radiobutton(window, text=val, variable=self.sepOut, 
+                   value=sep, command=chooseSep).grid(row=i, column=0)
+
             
-        #print(self.sepIn.get())   
-               
-        '''r1 = Radiobutton(window, text="Option 1", variable=var, value=1,
-                  command=sel)
-        r1.pack( anchor = W )
         
-        r2 = Radiobutton(root, text="Option 2", variable=var, value=2,
-                          command=sel)
-        r2.pack( anchor = W )
-        
-        r3 = Radiobutton(root, text="Option 3", variable=var, value=3,
-                          command=sel)
-        r3.pack( anchor = W)'''
         
 
     def initUI(self):
@@ -127,32 +138,38 @@ class Window(tk.Frame):
         #self.txt = tk.Text(self)
         #self.txt.pack(fill=tk.BOTH, expand=1)
         
+        mrow = 0
+        
+        # Open parameters button
+        openParBut = tk.Button(self.parent, text="Open Parameters", command=self.openParams)
+        openParBut.grid(row=mrow, column=0)
+        
         # Opened file path
         openLabel = tk.Label(self.parent, text='Here is the path')
         #openLabel.pack(side=tk.RIGHT)
-        openLabel.grid(row=0, column=1)
+        openLabel.grid(row=mrow + 1, column=1)
 
         # Open file button
         openButton = tk.Button(self.parent, text="Open")
         openButton.bind("<Button>", lambda e: self.openFile(openLabel))
         #openButton.pack(side=tk.LEFT)
-        openButton.grid(row=0, column=0)
+        openButton.grid(row=mrow + 1, column=0)
         
         # Saved file path
         saveLabel = tk.Label(self.parent, text='Here is the path of the saved file')
         #saveLabel.pack(side=tk.RIGHT)
-        saveLabel.grid(row=2, column=1)
+        saveLabel.grid(row=mrow + 4, column=1)
 
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save")
         saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
         #saveButton.pack(side=tk.LEFT)
-        saveButton.grid(row=2, column=0)
+        saveButton.grid(row=mrow + 4, column=0)
 
 
         # Save parameters button
         saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams)
-        saveParBut.grid(row=1, column=0)
+        saveParBut.grid(row=mrow + 3, column=0)
 
 
 def main():
