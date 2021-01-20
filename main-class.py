@@ -10,6 +10,7 @@ Created on Sun Jan 10 16:33:44 2021
 import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
+import calcgrads as cg
 
 class Window(tk.Frame):
     
@@ -21,7 +22,7 @@ class Window(tk.Frame):
         
         # Open parameters        
         self.sepIn = tk.IntVar() # Separator for input file
-        self.sepIn.set(0)
+        self.sepIn.set(2)
         self.ird = tk.IntVar() # Initial rows to delete
         self.ird.set(20)
         
@@ -31,8 +32,10 @@ class Window(tk.Frame):
         
         
         self.inData = pd.DataFrame() # Container for input file
+        
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
+        
         self.initUI()
 
     '''def onOpen(self):
@@ -50,7 +53,8 @@ class Window(tk.Frame):
         '''f = open(filename, "r")
         text = f.read()
         return text'''
-        data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
+        # data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
+        data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
         return data
     
     def aboutMenu(self):
@@ -69,7 +73,7 @@ class Window(tk.Frame):
         if tmp != '':
             self.inData = self.readFile(tmp)
             print('Number of columns: {}'.format(len(self.inData.columns)))
-            print(self.inData)
+            print(self.inData.head(10))
 
     def saveFile(self, label):
         print('Test')
