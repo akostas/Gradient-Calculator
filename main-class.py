@@ -18,13 +18,19 @@ class Window(tk.Frame):
         self.infile = tk.StringVar() # Filename of the input file
         self.outfile = tk.StringVar() # Filename of the output file
         self.parent = parent  
-        #self.sepOut = ';' # Separator for output file
+        
+        # Open parameters        
         self.sepIn = tk.IntVar() # Separator for input file
-        self.sepOut = tk.IntVar() # Separator for output file
         self.sepIn.set(0)
+        self.ird = tk.IntVar() # Initial rows to delete
+        self.ird.set(20)
+        
+        # Save parameters        
+        self.sepOut = tk.IntVar() # Separator for output file      
         self.sepOut.set(0)
+        
+        
         self.inData = pd.DataFrame() # Container for input file
-        #self.sepsNames = {'space': ' ', 'comma': ',', 'tab': '\t', 'semicolon': ';'}
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         self.initUI()
@@ -79,19 +85,44 @@ class Window(tk.Frame):
 
     def openParams(self):
         
+        def okBut(window):
+            #tmp = txtBox.get()
+            #self.ird.set(tmp)
+            print(self.ird.get())
+            window.destroy()
+            
+        def cancelButton(window, e, r):
+            self.ird.set(e)
+            self.sepIn.set(r)
+            window.destroy()
+        
         def chooseSep():
             #self.sepIn.set(s)
             print(self.sepIn.get())
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
-        i = 0
+        
+        initEntry = self.ird.get()
+        initRadio = self.sepIn.get()
+        
+        labelRows = tk.Label(window, text='Initial rows to delete').grid(row=0, column=0)      
+        txtBox = tk.Entry(window, textvariable = self.ird).grid(row=0, column=2) #entry textbox
+
+        i = 3
         label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
         for sep, val in self.sepsNames.items():
             i += 1
             tk.Radiobutton(window, text=val, variable=self.sepIn, 
                    value=sep, command=chooseSep).grid(row=i, column=0)
+            
+        quitButton = tk.Button(window, text='Cancel')
+        quitButton.bind("<Button>", lambda e: cancelButton(window,initEntry, initRadio))
+        quitButton.grid(row=i+2, column=1)
 
+        okButton = tk.Button(window, text="OK")
+        okButton.bind("<Button>", lambda e: okBut(window))
+        okButton.grid(row=i+2, column=0)
 
     def saveParams(self):
         
