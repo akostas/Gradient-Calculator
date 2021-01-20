@@ -74,15 +74,7 @@ class Window(tk.Frame):
         print(self.infile.get())
         if tmp != '':
             print('Now opening file...')
-            windowOpen = tk.Toplevel()
-            windowOpen.title("Opening file...")
-            
-            nlabel = tk.Label(windowOpen, text='Please wait unit the input file is open...').grid(row=0, column=0)   
-            time.sleep(2)
-            self.inData = self.readFile(tmp)
-            
-            windowOpen.destroy()
-            
+            self.inData = self.readFile(tmp)        
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
 
@@ -159,15 +151,8 @@ class Window(tk.Frame):
         pass
         
     def calculateGradients(self):
-        print('Now calculating gradients.')
-
-        #tk.messagebox.showinfo('Please wait while the gradients are being calculated...')
-        window = tk.Toplevel()
-        window.title("Gradients calculation")
-            
+        print('Now calculating gradients.')            
         self.gradData = cg.Grads(self.inData)
-        
-        window.destroy()
         print('They have been calculated')
         print(self.gradData.head(10))
 
