@@ -11,6 +11,7 @@ import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
 import calcgrads as cg
+import time
 
 class Window(tk.Frame):
     
@@ -30,8 +31,9 @@ class Window(tk.Frame):
         self.sepOut = tk.IntVar() # Separator for output file      
         self.sepOut.set(0)
         
-        
+        # DataFrames
         self.inData = pd.DataFrame() # Container for input file
+        self.gradData = pd.DataFrame() # Container for gradients
         
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
@@ -71,7 +73,16 @@ class Window(tk.Frame):
         label.configure(text=tmp)
         print(self.infile.get())
         if tmp != '':
+            print('Now opening file...')
+            windowOpen = tk.Toplevel()
+            windowOpen.title("Opening file...")
+            
+            nlabel = tk.Label(windowOpen, text='Please wait unit the input file is open...').grid(row=0, column=0)   
+            time.sleep(2)
             self.inData = self.readFile(tmp)
+            
+            windowOpen.destroy()
+            
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
 
@@ -83,9 +94,10 @@ class Window(tk.Frame):
         label.configure(text=tmp)
         print(self.outfile.get())
         if tmp != '':
-            self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-            print('Number of columns: {}'.format(len(self.inData.columns)))
-            print(self.inData)
+            #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+            self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+            print('Number of columns: {}'.format(len(self.gradData.columns)))
+            print(self.gradData.head(20))
 
     def openParams(self):
         
@@ -143,9 +155,21 @@ class Window(tk.Frame):
             tk.Radiobutton(window, text=val, variable=self.sepOut, 
                    value=sep, command=chooseSep).grid(row=i, column=0)
 
+    def checkInputData(self):
+        pass
+        
+    def calculateGradients(self):
+        print('Now calculating gradients.')
+
+        #tk.messagebox.showinfo('Please wait while the gradients are being calculated...')
+        window = tk.Toplevel()
+        window.title("Gradients calculation")
             
+        self.gradData = cg.Grads(self.inData)
         
-        
+        window.destroy()
+        print('They have been calculated')
+        print(self.gradData.head(10))
 
     def initUI(self):
 
@@ -169,9 +193,6 @@ class Window(tk.Frame):
         aboutMenu.add_command(label='Help', command=self.helpMenu)
         aboutMenu.add_command(label='About', command=self.aboutMenu)
         menubar.add_cascade(label="Information", menu=aboutMenu)   
-
-        #self.txt = tk.Text(self)
-        #self.txt.pack(fill=tk.BOTH, expand=1)
         
         mrow = 0
         
@@ -187,18 +208,27 @@ class Window(tk.Frame):
         # Open file button
         openButton = tk.Button(self.parent, text="Open")
         openButton.bind("<Button>", lambda e: self.openFile(openLabel))
-        #openButton.pack(side=tk.LEFT)
         openButton.grid(row=mrow + 1, column=0)
         
+        # Check input data button (if data have been inserted correctly)
+        checkDataButton = tk.Button(self.parent, text="Check Data")
+        checkDataButton.bind("<Button>", lambda e: self.checkInputData)
+        checkDataButton.grid(row=mrow + 2, column=0)
+        
+        
+        # Calculate gradients button
+        calcGradButton = tk.Button(self.parent, text="Calculate Gradients", command=self.calculateGradients)
+        #calcGradButton.bind("<Button>", lambda e: self.calculateGradients)
+        calcGradButton.grid(row=mrow + 2, column=1)
+        
+
         # Saved file path
         saveLabel = tk.Label(self.parent, text='Here is the path of the saved file')
-        #saveLabel.pack(side=tk.RIGHT)
         saveLabel.grid(row=mrow + 4, column=1)
 
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save")
         saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
-        #saveButton.pack(side=tk.LEFT)
         saveButton.grid(row=mrow + 4, column=0)
 
 
