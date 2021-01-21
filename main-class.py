@@ -42,7 +42,7 @@ class Window(tk.Frame):
         
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
-       
+        
         self.log_area = st.ScrolledText(self.parent, width = 30,height = 5, font = ("Times New Roman", 15), state='disabled' )
         self.log_area.grid(row=10, column = 0, pady = 10, padx = 10) 
        
@@ -84,10 +84,10 @@ class Window(tk.Frame):
     def openFile(self):
         ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
         tmp = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
-        self.infile.set(tmp)
-        print(self.infile.get())
         
         if tmp != '':
+            self.infile.set(tmp)
+            print(self.infile.get())
             print('Now opening file...')
             
             self.updateLOG('Now opening file...')
@@ -97,6 +97,8 @@ class Window(tk.Frame):
 
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
+        else:
+            self.updateLOG('No file has been provided')
 
     def saveFile(self):
         if not self.gradData.empty:
@@ -106,15 +108,17 @@ class Window(tk.Frame):
             print('Test')
             ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
             tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
-            self.outfile.set(tmp)
-            print(self.outfile.get())
             if tmp != '':
+                self.outfile.set(tmp)
+                print(self.outfile.get())
                 #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
                 self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
                 self.updateLOG('File has been saved')
 
                 print('Number of columns: {}'.format(len(self.gradData.columns)))
                 print(self.gradData.head(20))
+            else:
+                self.updateLOG('No filename has been provided')
         else:
             self.updateLOG('No data to save')
         
@@ -261,7 +265,7 @@ class Window(tk.Frame):
         saveParBut.grid(row=mrow + 3, column=0)
         
         
-      
+        
         
 
 
