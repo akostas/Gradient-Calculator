@@ -201,17 +201,17 @@ class Window(tk.Frame):
         menubar = tk.Menu(self.parent)
         self.parent.config(menu=menubar)
 
-        fileMenu = tk.Menu(menubar)
+        fileMenu = tk.Menu(menubar, tearoff=0)
         fileMenu.add_command(label="Open")
         fileMenu.add_command(label='Exit', command=self.parent.destroy)
         menubar.add_cascade(label="File", menu=fileMenu)    
         
-        settingsMenu = tk.Menu(self.parent)
+        settingsMenu = tk.Menu(self.parent, tearoff=0)
         settingsMenu.add_command(label='Import parameters')
         settingsMenu.add_command(label='Edit data')
         menubar.add_cascade(label="Settings", menu=settingsMenu)   
 
-        aboutMenu = tk.Menu(self.parent)
+        aboutMenu = tk.Menu(self.parent, tearoff=0)
         aboutMenu.add_command(label='Help', command=self.helpMenu)
         aboutMenu.add_command(label='About', command=self.aboutMenu)
         menubar.add_cascade(label="Information", menu=aboutMenu)   
