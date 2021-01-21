@@ -113,7 +113,7 @@ class Window(tk.Frame):
                 self.outfile.set(tmp)
                 print(self.outfile.get())
                 #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-                self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+                self.gradData.to_csv('{}.txt'.format(tmp), sep=self.seps[self.sepOut.get()], index=False)
                 self.updateLOG('File has been saved: {}'.format(tmp))
 
                 print('Number of columns: {}'.format(len(self.gradData.columns)))
