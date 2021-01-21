@@ -16,10 +16,16 @@ import time
 class Window(tk.Frame):
     
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent)   
+        tk.Frame.__init__(self, parent) 
+        self.parent = parent
+        
+        # Labels text
         self.infile = tk.StringVar() # Filename of the input file
+        self.infile.set('Here is the input file path')
         self.outfile = tk.StringVar() # Filename of the output file
-        self.parent = parent  
+        self.outfile.set('Here is the output file path')
+        self.logText = tk.StringVar()
+        self.logText.set('This is a test')
         
         # Open parameters        
         self.sepIn = tk.IntVar() # Separator for input file
@@ -37,7 +43,7 @@ class Window(tk.Frame):
         
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
-        
+       
         self.initUI()
 
     '''def onOpen(self):
@@ -66,30 +72,36 @@ class Window(tk.Frame):
         tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
 
 
-    def openFile(self, label):
+    def openFile(self):
         ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
         tmp = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
         self.infile.set(tmp)
-        label.configure(text=tmp)
         print(self.infile.get())
+        
         if tmp != '':
             print('Now opening file...')
-            self.inData = self.readFile(tmp)        
+            self.logText.set('Now opening file...')
+            self.inData = self.readFile(tmp)       
+            self.logText.set('File is now open.')
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
 
-    def saveFile(self, label):
-        print('Test')
-        ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
-        tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
-        self.outfile.set(tmp)
-        label.configure(text=tmp)
-        print(self.outfile.get())
-        if tmp != '':
-            #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-            self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-            print('Number of columns: {}'.format(len(self.gradData.columns)))
-            print(self.gradData.head(20))
+    def saveFile(self):
+        if not self.gradData.empty:
+            self.logText.set('Now saving file')
+            print('Test')
+            ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
+            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+            self.outfile.set(tmp)
+            print(self.outfile.get())
+            if tmp != '':
+                #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+                self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
+                self.logText.set('File has been saved')
+                print('Number of columns: {}'.format(len(self.gradData.columns)))
+                print(self.gradData.head(20))
+        else:
+            self.logText.set('No data to save')
 
     def openParams(self):
         
@@ -124,12 +136,12 @@ class Window(tk.Frame):
             tk.Radiobutton(window, text=val, variable=self.sepIn, 
                    value=sep, command=chooseSep).grid(row=i, column=0)
             
-        quitButton = tk.Button(window, text='Cancel')
-        quitButton.bind("<Button>", lambda e: cancelButton(window,initEntry, initRadio))
+        quitButton = tk.Button(window, text='Cancel', command=lambda : cancelButton(window,initEntry, initRadio))
+        #quitButton.bind("<Button>", lambda e: cancelButton(window,initEntry, initRadio))
         quitButton.grid(row=i+2, column=1)
 
-        okButton = tk.Button(window, text="OK")
-        okButton.bind("<Button>", lambda e: okBut(window))
+        okButton = tk.Button(window, text="OK", command=lambda: okBut(window))
+        #okButton.bind("<Button>", lambda e: okBut(window))
         okButton.grid(row=i+2, column=0)
 
     def saveParams(self):
@@ -151,10 +163,15 @@ class Window(tk.Frame):
         pass
         
     def calculateGradients(self):
-        print('Now calculating gradients.')            
-        self.gradData = cg.Grads(self.inData)
-        print('They have been calculated')
-        print(self.gradData.head(10))
+        if not self.inData.empty:
+            self.logText.set('Now calculating gradients')
+            print('Now calculating gradients.')   
+            self.gradData = cg.Grads(self.inData)
+            self.logText.set('Gradients have been calculated')
+            print('They have been calculated')
+            print(self.gradData.head(10))
+        else:
+            self.logText.set('!!!No input data!!!')
 
     def initUI(self):
 
@@ -186,19 +203,25 @@ class Window(tk.Frame):
         openParBut.grid(row=mrow, column=0)
         
         # Opened file path
-        openLabel = tk.Label(self.parent, text='Here is the path')
+        openLabel = tk.Label(self.parent, textvariable=self.infile)
         #openLabel.pack(side=tk.RIGHT)
         openLabel.grid(row=mrow + 1, column=1)
 
+        # Log Label
+        logLabel = tk.Label(self.parent, textvariable=self.logText)
+        logLabel.grid(row=mrow + 5, column=1)
+
         # Open file button
-        openButton = tk.Button(self.parent, text="Open")
-        openButton.bind("<Button>", lambda e: self.openFile(openLabel))
+        openButton = tk.Button(self.parent, text="Open", command=self.openFile)
+        #openButton.bind("<Button>", lambda e: self.openFile(openLabel, logLabel))
         openButton.grid(row=mrow + 1, column=0)
         
         # Check input data button (if data have been inserted correctly)
-        checkDataButton = tk.Button(self.parent, text="Check Data")
-        checkDataButton.bind("<Button>", lambda e: self.checkInputData)
+        checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData())
+        #checkDataButton.bind("<Button>", lambda e: self.checkInputData)
         checkDataButton.grid(row=mrow + 2, column=0)
+        
+        
         
         
         # Calculate gradients button
@@ -208,18 +231,28 @@ class Window(tk.Frame):
         
 
         # Saved file path
-        saveLabel = tk.Label(self.parent, text='Here is the path of the saved file')
+        saveLabel = tk.Label(self.parent, textvariable=self.outfile)
         saveLabel.grid(row=mrow + 4, column=1)
 
         # Saved file button
-        saveButton = tk.Button(self.parent, text="Save")
-        saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel)) 
+        saveButton = tk.Button(self.parent, text="Save", command=self.saveFile)
+        #saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel, logLabel)) 
         saveButton.grid(row=mrow + 4, column=0)
 
 
         # Save parameters button
         saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams)
         saveParBut.grid(row=mrow + 3, column=0)
+        
+        
+        '''
+        Create a label (something like a log) where messages will be shown
+        such as:
+            "The file is opening..."
+            "The gradients are being calculated"
+            "The data have been saved"
+        '''
+        
 
 
 def main():
