@@ -137,47 +137,79 @@ class Window(tk.Frame):
             window.destroy()
         
         def chooseSep():
-            #self.sepIn.set(s)
             print(self.sepIn.get())
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
+        window.geometry('160x180')
         
         initEntry = self.ird.get()
         initRadio = self.sepIn.get()
         
-        labelRows = tk.Label(window, text='Initial rows to delete').grid(row=0, column=0)      
-        txtBox = tk.Entry(window, textvariable = self.ird).grid(row=0, column=2) #entry textbox
+        
+        rowsFrame = tk.Frame(window)
+        rowsFrame.grid(row=0, column=0)
+        
+        labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
+        txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
 
-        i = 3
-        label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
+        sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+        sepFrame.grid(row=1, column=0, sticky='nesw')
+
+        label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+        i=1
         for sep, val in self.sepsNames.items():
+            tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
+                   value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
             i += 1
-            tk.Radiobutton(window, text=val, variable=self.sepIn, 
-                   value=sep, command=chooseSep).grid(row=i, column=0)
             
-        quitButton = tk.Button(window, text='Cancel', command=lambda : cancelButton(window,initEntry, initRadio))
-        #quitButton.bind("<Button>", lambda e: cancelButton(window,initEntry, initRadio))
-        quitButton.grid(row=i+2, column=1)
-
-        okButton = tk.Button(window, text="OK", command=lambda: okBut(window))
-        #okButton.bind("<Button>", lambda e: okBut(window))
-        okButton.grid(row=i+2, column=0)
+        
+        butFrame = tk.Frame(window)
+        butFrame.grid(row=2,column=0)
+        
+        quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window,initEntry, initRadio))
+        quitButton.grid(row=2, column=1)
+   
+        okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
+        okButton.grid(row=2, column=0)
 
     def saveParams(self):
         
-        def chooseSep():
-            #self.sepIn.set(s)
+        def okBut(window):
             print(self.sepOut.get())
+            window.destroy()
+            
+        def cancelButton(window, r):
+            self.sepOut.set(r)
+            window.destroy()
+        
+        def chooseSep():
+            print(self.sepOut.get())
+        
+        initRadio = self.sepOut.get()
         
         window = tk.Toplevel(self.parent)
         window.title("Save Parameters")
-        i = 0
-        label = tk.Label(window, text='Select separator:').grid(row=i, column=0)
+        
+        sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+        sepFrame.grid(row=0, column=0, sticky='nesw')
+        
+        label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+        i = 1
         for sep, val in self.sepsNames.items():
+            tk.Radiobutton(sepFrame, text=val, variable=self.sepOut, 
+                   value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
             i += 1
-            tk.Radiobutton(window, text=val, variable=self.sepOut, 
-                   value=sep, command=chooseSep).grid(row=i, column=0)
+            
+        butFrame = tk.Frame(window)
+        butFrame.grid(row=1,column=0)
+        
+        quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initRadio))
+        quitButton.grid(row=0, column=1)
+
+    
+        okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
+        okButton.grid(row=0, column=0)
 
     def checkInputData(self):
         pass
@@ -202,13 +234,14 @@ class Window(tk.Frame):
         self.parent.config(menu=menubar)
 
         fileMenu = tk.Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="Open")
+        fileMenu.add_command(label="Open", command=self.openFile)
         fileMenu.add_command(label='Exit', command=self.parent.destroy)
         menubar.add_cascade(label="File", menu=fileMenu)    
         
         settingsMenu = tk.Menu(self.parent, tearoff=0)
-        settingsMenu.add_command(label='Import parameters')
-        settingsMenu.add_command(label='Edit data')
+        settingsMenu.add_command(label='Import parameters', command=self.openParams)
+        settingsMenu.add_command(label='Edit data', command=lambda : self.checkInputData())
+        settingsMenu.add_command(label='Save parameters', command=self.saveParams)
         menubar.add_cascade(label="Settings", menu=settingsMenu)   
 
         aboutMenu = tk.Menu(self.parent, tearoff=0)
@@ -219,18 +252,16 @@ class Window(tk.Frame):
         mrow = 0
         
         # Open parameters button
-        openParBut = tk.Button(self.parent, text="Open Parameters", command=self.openParams, width=15)
+        openParBut = tk.Button(self.parent, text="Import Parameters", command=self.openParams, width=15)
         openParBut.grid(row=mrow, column=0)
         
 
         # Open file button
         openButton = tk.Button(self.parent, text="Open File", command=self.openFile, width=15)
-        #openButton.bind("<Button>", lambda e: self.openFile(openLabel, logLabel))
         openButton.grid(row=mrow, column=1)
         
         # Check input data button (if data have been inserted correctly)
         checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData(), width=15)
-        #checkDataButton.bind("<Button>", lambda e: self.checkInputData)
         checkDataButton.grid(row=mrow + 2, column=0)
         
         
@@ -238,13 +269,11 @@ class Window(tk.Frame):
         
         # Calculate gradients button
         calcGradButton = tk.Button(self.parent, text="Calculate Gradients", command=self.calculateGradients)
-        #calcGradButton.bind("<Button>", lambda e: self.calculateGradients)
         calcGradButton.grid(row=mrow + 2, column=1)
         
 
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save file", command=self.saveFile, width=15)
-        #saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel, logLabel)) 
         saveButton.grid(row=mrow + 3, column=1)
 
 
@@ -261,7 +290,7 @@ def main():
 
     root = tk.Tk()
     ex = Window(root)
-    root.geometry("800x600")
+    root.geometry("400x200")
     root.mainloop()  
 
 
