@@ -43,8 +43,8 @@ class Window(tk.Frame):
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         
-        self.log_area = st.ScrolledText(self.parent, width = 30,height = 5, font = ("Times New Roman", 15), state='disabled' )
-        self.log_area.grid(row=10, column = 0, pady = 10, padx = 10) 
+        self.log_area = st.ScrolledText(self.parent, width = 50,height = 5, font = ("Times New Roman", 11), state='disabled' )
+        self.log_area.grid(row=10, column=0, pady = 10, padx = 10, columnspan=2) 
        
         self.initUI()
 
@@ -73,9 +73,9 @@ class Window(tk.Frame):
     def helpMenu(self):
         tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
 
-    def updateLOG(self, text):
+    def updateLOG(self, logtext):
         self.log_area.configure(state='normal')
-        self.log_area.insert(tk.INSERT, '{}\n'.format(text))      
+        self.log_area.insert(tk.INSERT, '{}\n'.format(logtext))    
         self.log_area.update()
         self.log_area.yview(tk.END)
         self.log_area.configure(state='disabled')
@@ -90,7 +90,7 @@ class Window(tk.Frame):
             print(self.infile.get())
             print('Now opening file...')
             
-            self.updateLOG('Now opening file...')
+            self.updateLOG('Now opening file: {}'.format(tmp))
 
             self.inData = self.readFile(tmp)       
             self.updateLOG('File is now open.')
@@ -113,7 +113,7 @@ class Window(tk.Frame):
                 print(self.outfile.get())
                 #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
                 self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-                self.updateLOG('File has been saved')
+                self.updateLOG('File has been saved: {}'.format(tmp))
 
                 print('Number of columns: {}'.format(len(self.gradData.columns)))
                 print(self.gradData.head(20))
@@ -219,25 +219,17 @@ class Window(tk.Frame):
         mrow = 0
         
         # Open parameters button
-        openParBut = tk.Button(self.parent, text="Open Parameters", command=self.openParams)
+        openParBut = tk.Button(self.parent, text="Open Parameters", command=self.openParams, width=15)
         openParBut.grid(row=mrow, column=0)
         
-        # Opened file path
-        openLabel = tk.Label(self.parent, textvariable=self.infile)
-        #openLabel.pack(side=tk.RIGHT)
-        openLabel.grid(row=mrow + 1, column=1)
-
-        # Log Label
-        #logLabel = tk.Label(self.parent, textvariable=self.logText)
-        #logLabel.grid(row=mrow + 5, column=1)
 
         # Open file button
-        openButton = tk.Button(self.parent, text="Open", command=self.openFile)
+        openButton = tk.Button(self.parent, text="Open File", command=self.openFile, width=15)
         #openButton.bind("<Button>", lambda e: self.openFile(openLabel, logLabel))
-        openButton.grid(row=mrow + 1, column=0)
+        openButton.grid(row=mrow, column=1)
         
         # Check input data button (if data have been inserted correctly)
-        checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData())
+        checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData(), width=15)
         #checkDataButton.bind("<Button>", lambda e: self.checkInputData)
         checkDataButton.grid(row=mrow + 2, column=0)
         
@@ -250,18 +242,14 @@ class Window(tk.Frame):
         calcGradButton.grid(row=mrow + 2, column=1)
         
 
-        # Saved file path
-        saveLabel = tk.Label(self.parent, textvariable=self.outfile)
-        saveLabel.grid(row=mrow + 4, column=1)
-
         # Saved file button
-        saveButton = tk.Button(self.parent, text="Save", command=self.saveFile)
+        saveButton = tk.Button(self.parent, text="Save file", command=self.saveFile, width=15)
         #saveButton.bind("<Button>", lambda e: self.saveFile(saveLabel, logLabel)) 
-        saveButton.grid(row=mrow + 4, column=0)
+        saveButton.grid(row=mrow + 3, column=1)
 
 
         # Save parameters button
-        saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams)
+        saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams, width=15)
         saveParBut.grid(row=mrow + 3, column=0)
         
         
