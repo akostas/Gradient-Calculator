@@ -13,6 +13,7 @@ import pandas as pd
 import calcgrads as cg
 import time
 import tkinter.scrolledtext as st 
+import pandastable as pdt
 
 class Window(tk.Frame):
     
@@ -212,7 +213,28 @@ class Window(tk.Frame):
         okButton.grid(row=0, column=0)
 
     def checkInputData(self):
-        pass
+        window = tk.Toplevel(self.parent)
+        window.title("Check Input Data")
+        window.geometry('600x400')
+        
+        frame = tk.Frame(window)
+        frame.grid(row=0, column=0, sticky='nesw')
+        
+        tmp = self.inData.head(20)
+        
+        pt = pdt.Table(frame)
+        pt.model.df = tmp
+        pt.show()
+        
+        '''for num, col in enumerate(tmp.columns):
+            print(col)
+            tk.Entry(frame, text=col, width=10).grid(row=0, column=num)
+        
+        for index, row in tmp.iterrows():
+            for num, col in enumerate(tmp.columns):
+                tk.Label(frame, text='{:.6f}'.format(row[col]), width=10, borderwidth=2, relief='ridge', padx=0, pady=0).grid(row=index+1, column=num)'''
+        
+        
         
     def calculateGradients(self):
         if not self.inData.empty:
@@ -228,7 +250,6 @@ class Window(tk.Frame):
     def initUI(self):
 
         self.parent.title("Gradients Calculator")
-        #self.pack(fill=tk.BOTH, expand=1)
 
         menubar = tk.Menu(self.parent)
         self.parent.config(menu=menubar)
@@ -264,9 +285,7 @@ class Window(tk.Frame):
         checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData(), width=15)
         checkDataButton.grid(row=mrow + 2, column=0)
         
-        
-        
-        
+ 
         # Calculate gradients button
         calcGradButton = tk.Button(self.parent, text="Calculate Gradients", command=self.calculateGradients)
         calcGradButton.grid(row=mrow + 2, column=1)
