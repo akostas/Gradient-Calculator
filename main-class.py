@@ -12,6 +12,7 @@ from tkinter import filedialog
 import pandas as pd
 import calcgrads as cg
 import time
+import tkinter.scrolledtext as st 
 
 class Window(tk.Frame):
     
@@ -24,8 +25,6 @@ class Window(tk.Frame):
         self.infile.set('Here is the input file path')
         self.outfile = tk.StringVar() # Filename of the output file
         self.outfile.set('Here is the output file path')
-        self.logText = tk.StringVar()
-        self.logText.set('This is a test')
         
         # Open parameters        
         self.sepIn = tk.IntVar() # Separator for input file
@@ -43,6 +42,9 @@ class Window(tk.Frame):
         
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
+       
+        self.log_area = st.ScrolledText(self.parent, width = 30,height = 5, font = ("Times New Roman", 15), state='disabled' )
+        self.log_area.grid(row=10, column = 0, pady = 10, padx = 10) 
        
         self.initUI()
 
@@ -71,6 +73,13 @@ class Window(tk.Frame):
     def helpMenu(self):
         tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
 
+    def updateLOG(self, text):
+        self.log_area.configure(state='normal')
+        self.log_area.insert(tk.INSERT, '{}\n'.format(text))      
+        self.log_area.update()
+        self.log_area.yview(tk.END)
+        self.log_area.configure(state='disabled')
+
 
     def openFile(self):
         ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
@@ -80,15 +89,20 @@ class Window(tk.Frame):
         
         if tmp != '':
             print('Now opening file...')
-            self.logText.set('Now opening file...')
+            
+            self.updateLOG('Now opening file...')
+
             self.inData = self.readFile(tmp)       
-            self.logText.set('File is now open.')
+            self.updateLOG('File is now open.')
+
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
 
     def saveFile(self):
         if not self.gradData.empty:
-            self.logText.set('Now saving file')
+
+            self.updateLOG('Now saving file')
+
             print('Test')
             ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
             tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
@@ -97,11 +111,13 @@ class Window(tk.Frame):
             if tmp != '':
                 #self.outData = self.inData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
                 self.gradData.to_csv(tmp, sep=self.seps[self.sepOut.get()], index=False)
-                self.logText.set('File has been saved')
+                self.updateLOG('File has been saved')
+
                 print('Number of columns: {}'.format(len(self.gradData.columns)))
                 print(self.gradData.head(20))
         else:
-            self.logText.set('No data to save')
+            self.updateLOG('No data to save')
+        
 
     def openParams(self):
         
@@ -164,14 +180,14 @@ class Window(tk.Frame):
         
     def calculateGradients(self):
         if not self.inData.empty:
-            self.logText.set('Now calculating gradients')
+            self.updateLOG('Now calculating gradients')
             print('Now calculating gradients.')   
             self.gradData = cg.Grads(self.inData)
-            self.logText.set('Gradients have been calculated')
+            self.updateLOG('Gradients have been calculated')
             print('They have been calculated')
             print(self.gradData.head(10))
         else:
-            self.logText.set('!!!No input data!!!')
+            self.updateLOG('!!!No input data!!!')
 
     def initUI(self):
 
@@ -208,8 +224,8 @@ class Window(tk.Frame):
         openLabel.grid(row=mrow + 1, column=1)
 
         # Log Label
-        logLabel = tk.Label(self.parent, textvariable=self.logText)
-        logLabel.grid(row=mrow + 5, column=1)
+        #logLabel = tk.Label(self.parent, textvariable=self.logText)
+        #logLabel.grid(row=mrow + 5, column=1)
 
         # Open file button
         openButton = tk.Button(self.parent, text="Open", command=self.openFile)
@@ -245,13 +261,7 @@ class Window(tk.Frame):
         saveParBut.grid(row=mrow + 3, column=0)
         
         
-        '''
-        Create a label (something like a log) where messages will be shown
-        such as:
-            "The file is opening..."
-            "The gradients are being calculated"
-            "The data have been saved"
-        '''
+      
         
 
 
