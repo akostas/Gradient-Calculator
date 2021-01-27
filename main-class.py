@@ -72,7 +72,15 @@ class Window(tk.Frame):
         tk.messagebox.showinfo("About", "This software has been created by Konstantinos Angelou!\nemail: angelou.konstantinos@gmail.com")
     
     def helpMenu(self):
-        tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
+        #tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
+        window = tk.Toplevel(self.parent)
+        window.title("Help")
+        window.geometry('400x280')
+        
+        helptext = '''This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.\nThe steps to calculate the gradients are the following:\n  1) Import Parameters: Define the characteristics of the input file (e.g. column separator).\n  2) Open File: Choose the file with the data that need to be imported.\n  3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n  4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n  5) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n  6) Save File: Save the gradients into a text file.\n'''
+        
+        
+        label = tk.Label(window, text=helptext, wraplength=400, justify='left', font=12).grid(row=0, column=0)
 
     def updateLOG(self, logtext):
         self.log_area.configure(state='normal')
