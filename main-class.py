@@ -45,7 +45,35 @@ class Window(tk.Frame):
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         
         self.log_area = st.ScrolledText(self.parent, width = 50,height = 5, font = ("Times New Roman", 11), state='disabled' )
-        self.log_area.grid(row=10, column=0, pady = 10, padx = 10, columnspan=2) 
+        self.log_area.grid(row=10, column=0, pady = 10, padx = 10, columnspan=2)
+        
+        # Define input file
+        self.inSource = tk.IntVar()
+        self.inSource.set(1)
+        self.inSourceLabel = tk.StringVar()
+        self.inSourceLabel.set('Sim4Life')
+        
+        # Other file
+        self.conHeaders = tk.IntVar() # Contains headers
+        self.conHeaders.set(1)
+        self.setHeaders = tk.IntVar() # Set new headers
+        self.setHeaders.set(0)
+        self.noColumns = tk.IntVar() # Number of columns
+        self.noColumns.set(6)
+        self.xCol = tk.StringVar() # Column x
+        self.xCol.set('x')
+        self.yCol = tk.StringVar() # Column y
+        self.yCol.set('y')
+        self.zCol = tk.StringVar() # Column z
+        self.zCol.set('z')
+        self.bxCol = tk.StringVar() # Column Bx
+        self.bxCol.set('Bx')
+        self.byCol = tk.StringVar() # Column By
+        self.byCol.set('By')
+        self.bzCol = tk.StringVar() # Column Bz
+        self.bzCol.set('Bz')
+        self.bCol = tk.StringVar() # Column B
+        self.bCol.set('B')
        
         self.initUI()
 
@@ -65,7 +93,10 @@ class Window(tk.Frame):
         text = f.read()
         return text'''
         # data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
-        data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
+        if self.inSource.get() == 1:
+            data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
+        else:
+            data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
         return data
     
     def aboutMenu(self):
@@ -150,12 +181,13 @@ class Window(tk.Frame):
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
-        window.geometry('160x180')
+        window.geometry('300x250')
         
         initEntry = self.ird.get()
         initRadio = self.sepIn.get()
         
         
+        '''
         rowsFrame = tk.Frame(window)
         rowsFrame.grid(row=0, column=0)
         
@@ -170,17 +202,192 @@ class Window(tk.Frame):
         for sep, val in self.sepsNames.items():
             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
                    value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
-            i += 1
+            i += 1           
+        '''
+
+        def selSim4Life(window):
+
+            for wid in window.grid_slaves():
+                wid.grid_forget()
+
+            self.inSourceLabel.set('Sim4Life')
+
+            rowsFrame = tk.Frame(window)
+            rowsFrame.grid(row=0, column=0)
             
+            labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
+            txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
+    
+            sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+            sepFrame.grid(row=1, column=0, sticky='nesw')
+    
+            label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+            i=1
+            for sep, val in self.sepsNames.items():
+                tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
+                       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+                i += 1
+            
+        
+        def columns(frame):
+            for wid in frame.grid_slaves():
+                wid.grid_forget()
+                
+            initLabels = ['x', 'y', 'z', 'Bx', 'By', 'Bz']
+            variables = [self.xCol, self.yCol, self.zCol, self.bxCol, self.byCol, self.bzCol]
+            
+             # Define the number of columns
+            # lb1 = tk.Label(frame, text='Number of columns').grid(row=0, column=0)
+            # sel1 = tk.OptionMenu(frame, self.noColumns, *[4,6,7]).grid(row=0, column=1)
+            
+            if self.noColumns.get()==len(initLabels):
+                for num in range(len(initLabels)):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+            elif self.noColumns.get()==4:
+                for num in range(3):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+                    
+                tk.Label(frame, text=initLabels[num]).grid(row=4, column=0)
+                tk.Entry(frame, textvariable=self.bCol, state='disabled').grid(row=4, column=1)
+            elif self.noColumns.get()==7:
+                for num in range(len(initLabels)):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+                    
+                tk.Label(frame, text='B').grid(row=8, column=0)
+                tk.Entry(frame, textvariable=self.bCol, state='disabled').grid(row=8, column=1)
+            else:
+                tk.messagebox.showinfo("Error", "It only accepts 4, 6 and 7 labels.\nThe first 3 need to be x,y,z.")
+            
+        
+        def selOther(window):
+            self.inSourceLabel.set('Other')
+            for wid in window.grid_slaves():
+                wid.grid_forget()
+            #tmp2 = tk.Label(window, text='Other').grid(row=0, column=1)
+            
+            # Does the input file contain headers
+            ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0).grid(row=1, column=0)
+            
+            sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+            sepFrame.grid(row=2, column=0, sticky='nesw')
+            
+            label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+            i=1
+            for sep, val in self.sepsNames.items():
+                tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
+                       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+                i += 1
+            
+            
+            #frame = tk.Frame(window)
+            #frame.grid(row=3, column=0)
+            
+            
+            
+            # # Define the number of columns
+            # lb1 = tk.Label(frame, text='Number of columns').grid(row=0, column=0)
+            # #en1 = tk.Entry(frame, textvariable=self.noColumns, state='disabled').grid(row=0, column=1)
+            
+            # sel1 = tk.OptionMenu(frame, self.noColumns, *[4,6,7]).grid(row=0, column=1)
+            
+            #print(self.noColumns.get())
+            #columns(frame)
+            '''initLabels = ['x', 'y', 'z', 'Bx', 'By', 'Bz']
+            variables = [self.xCol, self.yCol, self.zCol, self.bxCol, self.byCol, self.bzCol]
+            
+            if self.noColumns.get()==len(initLabels):
+                for num in range(len(initLabels)):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+            elif self.noColumns.get()==4:
+                for num in range(3):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+                    
+                tk.Label(frame, text=initLabels[num]).grid(row=4, column=0)
+                tk.Entry(frame, textvariable=self.bCol, state='disabled').grid(row=4, column=1)
+            elif self.noColumns.get()==7:
+                for num in range(len(initLabels)):
+                    tk.Label(frame, text=initLabels[num]).grid(row=num+1, column=0)
+                    tk.Entry(frame, textvariable=variables[num], state='disabled').grid(row=num+1, column=1)
+                    
+                tk.Label(frame, text='B').grid(row=8, column=0)
+                tk.Entry(frame, textvariable=self.bCol, state='disabled').grid(row=8, column=1)
+            else:
+                tk.messagebox.showinfo("Error", "It only accepts 4, 6 and 7 labels.\nThe first 3 need to be x,y,z.")
+            '''
+            
+            '''# Define the column names
+            lbx = tk.Label(frame, text='x').grid(row=1, column=0)
+            enx = tk.Entry(frame, textvariable=self.xCol, state='disabled').grid(row=1, column=1)
+            lby = tk.Label(frame, text='y').grid(row=2, column=0)
+            eny = tk.Entry(frame, textvariable=self.yCol, state='disabled').grid(row=2, column=1)
+            
+            lbz = tk.Label(frame, text='z').grid(row=3, column=0)
+            enz = tk.Entry(frame, textvariable=self.zCol, state='disabled').grid(row=3, column=1)
+            
+            lbbx = tk.Label(frame, text='Bx').grid(row=4, column=0)
+            enbx = tk.Entry(frame, textvariable=self.bxCol, state='disabled').grid(row=4, column=1)
+            lbby = tk.Label(frame, text='By').grid(row=5, column=0)
+            enby = tk.Entry(frame, textvariable=self.byCol, state='disabled').grid(row=5, column=1)
+            
+            lbbz = tk.Label(frame, text='Bz').grid(row=6, column=0)
+            enbz = tk.Entry(frame, textvariable=self.bzCol, state='disabled').grid(row=6, column=1)
+            
+            lbb = tk.Label(frame, text='B').grid(row=7, column=0)
+            enb = tk.Entry(frame, textvariable=self.bCol, state='disabled').grid(row=7, column=1)'''
+            
+            
+            
+            def changeState(frame):
+                print(self.setHeaders.get())
+                '''for wid in frame.grid_slaves():
+                    wid.configure(state='normal' if self.setHeaders==1 else 'disabled')'''
+                if frame.winfo_children:               
+                    for w in frame.winfo_children():
+                        if self.setHeaders.get():
+                            w.configure(state='normal')
+                        else:
+                            w.configure(state='disabled')
+            
+            
+            
+            # Do you want to set new headers
+            #ch2 = tk.Checkbutton(window, text='Set new headers', variable=self.setHeaders, onvalue=1, offvalue=0, command=lambda:changeState(frame)).grid(row=2, column=0)
+            
+            
+            
+        # LabelFrame based on selection
+        tmpLabel = tk.Label(window, textvariable=self.inSourceLabel)
+        labelFr = tk.LabelFrame(window, labelwidget=tmpLabel)
+        labelFr.grid(row=1, column=0)
+        selSim4Life(labelFr)
+        
+        # Radiobuttons - selection
+        rbFrame = tk.Frame(window)
+        rbFrame.grid(row=0, column=0)
+        rb1 = tk.Radiobutton(rbFrame, text='Sim4Life', variable=self.inSource, value=1, command=lambda:selSim4Life(labelFr)).grid(row=0, column=0)
+        rb2 = tk.Radiobutton(rbFrame, text='Other', variable=self.inSource, value=2, command=lambda: selOther(labelFr)).grid(row=0, column=1)
+        #rb1 = tk.Radiobutton(rbFrame, text='Sim4Life', variable=self.sepIn, value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+        
+        
+
+        
+        
+        #tmp2 = tk.Label(labelFr, text='hello').grid(row=0, column=1)
+        
         
         butFrame = tk.Frame(window)
         butFrame.grid(row=2,column=0)
         
         quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window,initEntry, initRadio))
-        quitButton.grid(row=2, column=1)
+        quitButton.grid(row=0, column=1)
    
         okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
-        okButton.grid(row=2, column=0)
+        okButton.grid(row=0, column=0)
 
     def saveParams(self):
         
