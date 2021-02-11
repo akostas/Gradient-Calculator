@@ -2,7 +2,7 @@
 """
 Created on Fri Jan  8 17:44:10 2021
 
-@author: Konstantinos
+@author: Konstantinos Angelou
 """
 import pandas as pd
 import numpy as np
@@ -159,82 +159,6 @@ def grad_B_(data):
     grad['g{}'.format(data.columns[3])] = np.sqrt(grad[gheaders[3]]**2 + grad[gheaders[4]]**2 + grad[gheaders[5]]**2)
     return grad
 
-
-"""
-def grad_dir_old(data):
-    '''
-    Calculate the gradients when there are 6 columns (values for each 
-    direction).
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Contains the magnetic field (input data).
-
-    Returns
-    -------
-    grad : pandas.DataFrame
-        Contains the gradients of the magnetic field.
-
-    '''
-    # Calculate gradients along the x axis
-    data.sort_values(by=['z', 'y', 'x'], inplace=True)
-    data.sort_values(by=[data.columns[2], data.columns[1], data.columns[0]], inplace=True)
-    gbxx = np.gradient(data['Re-Bx'], data['x'], edge_order=2)
-    gbyx = np.gradient(data['Re-By'], data['x'], edge_order=2)
-    gbzx = np.gradient(data['Re-Bz'], data['x'], edge_order=2)
-    dataI = list(data.index)
-    
-    gbxxI = sorted(list(zip(dataI, gbxx)), key=lambda l:l[0], reverse=False)
-    gbyxI = sorted(list(zip(dataI, gbyx)), key=lambda l:l[0], reverse=False)
-    gbzxI = sorted(list(zip(dataI, gbzx)), key=lambda l:l[0], reverse=False)
-    
-    # Calculate gradients along the y axis
-    data.sort_values(by=['z', 'x', 'y'], inplace=True)
-    gbxy = np.gradient(data['Re-Bx'], data['y'], edge_order=2)
-    gbyy = np.gradient(data['Re-By'], data['y'], edge_order=2)
-    gbzy = np.gradient(data['Re-Bz'], data['y'], edge_order=2)
-    dataI = list(data.index)
-    
-    gbxyI = sorted(list(zip(dataI, gbxy)), key=lambda l:l[0], reverse=False)
-    gbyyI = sorted(list(zip(dataI, gbyy)), key=lambda l:l[0], reverse=False)
-    gbzyI = sorted(list(zip(dataI, gbzy)), key=lambda l:l[0], reverse=False)
-    
-    # Calculate gradients along the z axis
-    data.sort_values(by=['y', 'x', 'z'], inplace=True)
-    gbxz = np.gradient(data['Re-Bx'], data['z'], edge_order=2)
-    gbyz = np.gradient(data['Re-By'], data['z'], edge_order=2)
-    gbzz = np.gradient(data['Re-Bz'], data['z'], edge_order=2)
-    dataI = list(data.index)
-    
-    gbxzI = sorted(list(zip(dataI, gbxz)), key=lambda l:l[0], reverse=False)
-    gbyzI = sorted(list(zip(dataI, gbyz)), key=lambda l:l[0], reverse=False)
-    gbzzI = sorted(list(zip(dataI, gbzz)), key=lambda l:l[0], reverse=False)
-
-    # Create the gradients database headers
-    gheaders = ['x', 'y', 'z']
-    for i in list(data.columns)[3:]:
-        for j in ['x', 'y', 'z']:
-            gheaders.append('{}-g{}{}'.format(i.split('-')[0], i.split('-')[1], j))
-
-    # Create the gradients database
-    grad = pd.DataFrame(columns=gheaders)
-
-    data.sort_index(inplace=True)
-    
-    grad['x'] = data['x'].copy()
-    grad['y'] = data['y'].copy()
-    grad['z'] = data['z'].copy()
-
-    ml = [gbxxI, gbxyI, gbxzI, gbyxI, gbyyI, gbyzI, gbzxI, gbzyI, gbzzI]
-    for num, i in enumerate(list(grad.columns)[3:]):
-        grad[i] = [row[1] for row in ml[num]]
-
-
-    #grad.sort_values(by=['x', 'y', 'z']).head(10).to_csv('grads-10-test.txt', sep=' ', index=False)
-    return grad
-"""
-
 def grad_dir(data):
     '''
     Calculate the gradients when there are 6 columns (values for each 
@@ -350,25 +274,3 @@ def Grads(data):
     else:
         return -1
     return grad
-        
-"""
-def Export(grad, fname):
-    '''
-    Function to export the gradients into a file.
-
-    Parameters
-    ----------
-    grad : pandas.DataFrame
-        Contains the gradient data.
-    fname : string
-        The output filename.
-
-    Returns
-    -------
-    None.
-
-    '''
-    # Export gradient
-    gfname = fname.rstrip('.txt') + '-Gradient.txt'
-    grad.to_csv(gfname, sep=' ', index=False)
-"""

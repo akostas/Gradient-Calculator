@@ -9,7 +9,6 @@ import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
 import calcgrads as cg
-import time
 import tkinter.scrolledtext as st 
 import pandastable as pdt
 import datetime as dtm
@@ -55,24 +54,6 @@ class Window(tk.Frame):
         # Other file
         self.conHeaders = tk.IntVar() # Contains headers
         self.conHeaders.set(1)
-        '''self.setHeaders = tk.IntVar() # Set new headers
-        self.setHeaders.set(0)
-        self.noColumns = tk.IntVar() # Number of columns
-        self.noColumns.set(6)
-        self.xCol = tk.StringVar() # Column x
-        self.xCol.set('x')
-        self.yCol = tk.StringVar() # Column y
-        self.yCol.set('y')
-        self.zCol = tk.StringVar() # Column z
-        self.zCol.set('z')
-        self.bxCol = tk.StringVar() # Column Bx
-        self.bxCol.set('Bx')
-        self.byCol = tk.StringVar() # Column By
-        self.byCol.set('By')
-        self.bzCol = tk.StringVar() # Column Bz
-        self.bzCol.set('Bz')
-        self.bCol = tk.StringVar() # Column B
-        self.bCol.set('B')'''
        
         self.initUI()
 
@@ -199,7 +180,7 @@ class Window(tk.Frame):
                 self.outfile.set(tmp)
                 print(self.outfile.get())
                 # Write the data to the file
-                self.gradData.to_csv('{}'.format(tmp), sep=self.seps[self.sepOut.get()], index=False)
+                self.gradData.to_csv('{}.txt'.format(tmp.rstrip('.txt')), sep=self.seps[self.sepOut.get()], index=False)
                 self.updateLOG('File has been saved: {}'.format(tmp))
 
                 print('Number of columns: {}'.format(len(self.gradData.columns)))
@@ -349,33 +330,6 @@ class Window(tk.Frame):
                        value=sep).grid(row=i, column=0, sticky='w')
                 i += 1
             
-    
-            """
-            def changeState(frame):
-                '''
-                
-
-                Parameters
-                ----------
-                frame : TYPE
-                    DESCRIPTION.
-
-                Returns
-                -------
-                None.
-
-                '''
-                print(self.setHeaders.get())
-                '''for wid in frame.grid_slaves():
-                    wid.configure(state='normal' if self.setHeaders==1 else 'disabled')'''
-                if frame.winfo_children:               
-                    for w in frame.winfo_children():
-                        if self.setHeaders.get():
-                            w.configure(state='normal')
-                        else:
-                            w.configure(state='disabled')
-              """             
-        
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
@@ -462,9 +416,6 @@ class Window(tk.Frame):
             self.sepOut.set(r)
             window.destroy()
         
-        '''def chooseSep():
-            print(self.sepOut.get())'''
-        
         # Initial values - for use in cancel button
         # Initial separator
         initRadio = self.sepOut.get()
@@ -529,33 +480,7 @@ class Window(tk.Frame):
         pt = pdt.Table(frame)
         pt.model.df = tmp
         pt.show()
-          
-    """   
-    def checkGradData(self):
-        '''
-        Creates a window in which the input data may be checked, if they 
-        have been imported correctly.
 
-        Returns
-        -------
-        None.
-
-        '''
-        window = tk.Toplevel(self.parent)
-        window.title("Check Gradient Data")
-        window.geometry('600x400')
-        
-        # Frame for the printing
-        frame = tk.Frame(window)
-        frame.grid(row=0, column=0, sticky='nesw')
-        
-        tmp = self.gradData.head(20)
-        
-        pt = pdt.Table(frame)
-        pt.model.df = tmp
-        pt.show()
-    """   
-        
     def calculateGradients(self):
         '''
         Function to apply the required steps for the calculation
