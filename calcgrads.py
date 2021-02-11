@@ -16,7 +16,7 @@ def get_digits(str1):
 
 
 
-def readFile(fname, initrows, separ):
+def readData(fname, initrows=20, separ='\t'):
     # Read the first 20 lines to get the column labels
     #fname = 'ExportedFieldData-B-Quasi-Static-1kHz.txt'
     
@@ -68,9 +68,59 @@ def readFile(fname, initrows, separ):
 #dbak = data.copy() # Keep a copy of the database
 #data = dbak.copy()
 
-def Grads(data):
+def grad_B_(data):
+        
+    data.sort_values(by=[data.columns[2], data.columns[1], data.columns[0]], inplace=True)
+    gbx = np.gradient(data[data.columns[3]], data[data.columns[0]], edge_order=2)
+    dataI = list(data.index)
+    
+    gbxI = sorted(list(zip(dataI, gbx)), key=lambda l:l[0], reverse=False)
+    
+    
+    # Calculate gradients along the y axis
+    data.sort_values(by=[data.columns[2], data.columns[0], data.columns[1]], inplace=True)
+    gby = np.gradient(data[data.columns[3]], data[data.columns[1]], edge_order=2)
+    dataI = list(data.index)
+    
+    gbyI = sorted(list(zip(dataI, gby)), key=lambda l:l[0], reverse=False)
+    
+    # Calculate gradients along the z axis
+    data.sort_values(by=[data.columns[1], data.columns[0], data.columns[2]], inplace=True)
+    gbz = np.gradient(data[data.columns[3]], data[data.columns[2]], edge_order=2)
+    dataI = list(data.index)
+    
+    gbzI = sorted(list(zip(dataI, gbz)), key=lambda l:l[0], reverse=False)  
+
+
+    # Create the gradients database headers
+    gheaders = [data.columns[0], data.columns[1], data.columns[2], \
+                'g{}{}'.format(data.columns[3], data.columns[0]), \
+                'g{}{}'.format(data.columns[3], data.columns[1]), \
+                'g{}{}'.format(data.columns[3], data.columns[2]) ]
+    
+    # Create the gradients database
+    grad = pd.DataFrame(columns=gheaders)
+    
+    data.sort_index(inplace=True)
+    
+    grad[data.columns[0]] = data[data.columns[0]].copy()
+    grad[data.columns[1]] = data[data.columns[1]].copy()
+    grad[data.columns[2]] = data[data.columns[2]].copy()
+    
+    ml = [gbxI, gbyI, gbzI]
+    for num, i in enumerate(list(grad.columns)[3:]):
+        grad[i] = [row[1] for row in ml[num]]
+    
+    
+    grad['g{}'.format(data.columns[3])] = np.sqrt(grad[gheaders[3]]**2 + grad[gheaders[4]]**2 + grad[gheaders[5]]**2)
+    return grad
+
+
+
+def grad_dir_old(data):
     # Calculate gradients along the x axis
     data.sort_values(by=['z', 'y', 'x'], inplace=True)
+    data.sort_values(by=[data.columns[2], data.columns[1], data.columns[0]], inplace=True)
     gbxx = np.gradient(data['Re-Bx'], data['x'], edge_order=2)
     gbyx = np.gradient(data['Re-By'], data['x'], edge_order=2)
     gbzx = np.gradient(data['Re-Bz'], data['x'], edge_order=2)
@@ -123,7 +173,95 @@ def Grads(data):
 
 
     #grad.sort_values(by=['x', 'y', 'z']).head(10).to_csv('grads-10-test.txt', sep=' ', index=False)
+    return grad
 
+def grad_dir(data):
+    x = data.columns[0]
+    y = data.columns[1]
+    z = data.columns[2]
+    bx = data.columns[3]
+    by = data.columns[4]
+    bz = data.columns[5]
+    b = '|B|'
+    
+    # Calculate |B|
+    data[b] = np.sqrt(data[bx]**2 + data[by]**2 + data[bz]**2)   
+    
+    # Calculate gradients along the x axis
+    data.sort_values(by=[z, y, x], inplace=True)
+    gbxx = np.gradient(data[bx], data[x], edge_order=2)
+    gbyx = np.gradient(data[by], data[x], edge_order=2)
+    gbzx = np.gradient(data[bz], data[x], edge_order=2)
+    gbx = np.gradient(data[b], data[x], edge_order=2)
+    dataI = list(data.index)
+    
+    gbxxI = sorted(list(zip(dataI, gbxx)), key=lambda l:l[0], reverse=False)
+    gbyxI = sorted(list(zip(dataI, gbyx)), key=lambda l:l[0], reverse=False)
+    gbzxI = sorted(list(zip(dataI, gbzx)), key=lambda l:l[0], reverse=False)
+    
+    gbxI = sorted(list(zip(dataI, gbx)), key=lambda l:l[0], reverse=False)
+    
+    # Calculate gradients along the y axis
+    data.sort_values(by=[z, x, y], inplace=True)
+    gbxy = np.gradient(data[bx], data[y], edge_order=2)
+    gbyy = np.gradient(data[by], data[y], edge_order=2)
+    gbzy = np.gradient(data[bz], data[y], edge_order=2)
+    gby = np.gradient(data[b], data[y], edge_order=2)
+    dataI = list(data.index)
+    
+    gbxyI = sorted(list(zip(dataI, gbxy)), key=lambda l:l[0], reverse=False)
+    gbyyI = sorted(list(zip(dataI, gbyy)), key=lambda l:l[0], reverse=False)
+    gbzyI = sorted(list(zip(dataI, gbzy)), key=lambda l:l[0], reverse=False)
+    
+    gbyI = sorted(list(zip(dataI, gby)), key=lambda l:l[0], reverse=False)
+    
+    # Calculate gradients along the z axis
+    data.sort_values(by=[y, x, z], inplace=True)
+    gbxz = np.gradient(data[bx], data[z], edge_order=2)
+    gbyz = np.gradient(data[by], data[z], edge_order=2)
+    gbzz = np.gradient(data[bz], data[z], edge_order=2)
+    gbz = np.gradient(data[b], data[z], edge_order=2)
+    dataI = list(data.index)
+    
+    gbxzI = sorted(list(zip(dataI, gbxz)), key=lambda l:l[0], reverse=False)
+    gbyzI = sorted(list(zip(dataI, gbyz)), key=lambda l:l[0], reverse=False)
+    gbzzI = sorted(list(zip(dataI, gbzz)), key=lambda l:l[0], reverse=False)
+    
+    gbzI = sorted(list(zip(dataI, gbz)), key=lambda l:l[0], reverse=False)
+
+    # Create the gradients database headers
+    gheaders = [x, y, z]
+    for i in list(data.columns)[3:]:
+        for j in [x, y, z]:
+            #gheaders.append('{}-g{}{}'.format(i.split('-')[0], i.split('-')[1], j))
+            gheaders.append('g{}{}'.format(i.replace('Re-', ''), j))
+
+    # Create the gradients database
+    grad = pd.DataFrame(columns=gheaders)
+
+    data.sort_index(inplace=True)
+    
+    grad[x] = data[x].copy()
+    grad[y] = data[y].copy()
+    grad[z] = data[z].copy()
+
+    ml = [gbxxI, gbxyI, gbxzI, gbyxI, gbyyI, gbyzI, gbzxI, gbzyI, gbzzI, gbxI, gbyI, gbzI]
+    for num, i in enumerate(list(grad.columns)[3:]):
+        grad[i] = [row[1] for row in ml[num]]
+
+
+    #grad.sort_values(by=['x', 'y', 'z']).head(10).to_csv('grads-10-test.txt', sep=' ', index=False)
+    return grad
+
+def Grads(data):
+    if len(data.columns)==4:
+        grad = grad_B_(data)
+    elif len(data.columns)==6:
+        grad = grad_dir(data)
+    else:
+        return -1
+    return grad
+        
 
 def Export(grad, fname):
     # Export gradient
