@@ -45,8 +45,8 @@ class Window(tk.Frame):
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         
-        self.log_area = st.ScrolledText(self.parent, width = 50,height = 5, font = ("Times New Roman", 8), state='disabled' )
-        self.log_area.grid(row=10, column=0, pady = 10, padx = 10, columnspan=2)
+        self.log_area = st.ScrolledText(self.parent, width=70, height=7, font=("Times New Roman", 8), state='disabled' )
+        self.log_area.grid(row=10, column=0, pady=10, padx=10, columnspan=3)
         
         # Define input file
         self.inSource = tk.IntVar()
@@ -453,6 +453,20 @@ class Window(tk.Frame):
                 tk.Label(frame, text='{:.6f}'.format(row[col]), width=10, borderwidth=2, relief='ridge', padx=0, pady=0).grid(row=index+1, column=num)'''
         
         
+    def checkGradData(self):
+        window = tk.Toplevel(self.parent)
+        window.title("Check Gradient Data")
+        window.geometry('600x400')
+        
+        frame = tk.Frame(window)
+        frame.grid(row=0, column=0, sticky='nesw')
+        
+        tmp = self.gradData.head(20)
+        
+        pt = pdt.Table(frame)
+        pt.model.df = tmp
+        pt.show()
+        
         
     def calculateGradients(self):
         if not self.inData.empty:
@@ -500,7 +514,7 @@ class Window(tk.Frame):
 
         # Open file button
         openButton = tk.Button(self.parent, text="Open File", command=self.openFile, width=15)
-        openButton.grid(row=mrow, column=1)
+        openButton.grid(row=mrow, column=2)
         
         # Check input data button (if data have been inserted correctly)
         checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkInputData(), width=15)
@@ -511,10 +525,14 @@ class Window(tk.Frame):
         calcGradButton = tk.Button(self.parent, text="Calculate Gradients", command=self.calculateGradients)
         calcGradButton.grid(row=mrow + 2, column=1)
         
+        # Check input data button (if data have been inserted correctly)
+        checkGradButton = tk.Button(self.parent, text="Check  Gradient Data", command=lambda : self.checkGradData(), width=15)
+        checkGradButton.grid(row=mrow + 2, column=2)
+        
 
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save file", command=self.saveFile, width=15)
-        saveButton.grid(row=mrow + 3, column=1)
+        saveButton.grid(row=mrow + 3, column=2)
 
 
         # Save parameters button
@@ -530,7 +548,7 @@ def main():
 
     root = tk.Tk()
     ex = Window(root)
-    root.geometry("400x200")
+    root.geometry("460x200")
     root.mainloop()  
 
 
