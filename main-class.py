@@ -458,10 +458,13 @@ class Window(tk.Frame):
         if not self.inData.empty:
             self.updateLOG('Now calculating gradients')
             print('Now calculating gradients.')   
-            self.gradData = cg.Grads(self.inData)
-            self.updateLOG('Gradients have been calculated')
-            print('They have been calculated')
-            print(self.gradData.head(10))
+            if len(self.inData.columns)==4 or len(self.inData.columns)==6:
+                self.gradData = cg.Grads(self.inData)
+                self.updateLOG('Gradients have been calculated')
+                print('They have been calculated')
+                print(self.gradData.head(10))
+            else:
+                self.updateLOG('ERROR!!!Check Help->Information for proper input files!')
         else:
             self.updateLOG('!!!No input data!!!')
 
