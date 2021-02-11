@@ -107,12 +107,11 @@ class Window(tk.Frame):
         #tk.messagebox.showinfo("Help", "This software is useful when you want to calculate the gradients of the magnetic field that has occurred from Sim4Life. The data from Sim4Life can be imported here (as is) and the gradients will be calculated for every direction.")
         window = tk.Toplevel(self.parent)
         window.title("Help")
-        window.geometry('400x280')
+        window.geometry('700x500')
         
-        helptext = '''This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.\nThe steps to calculate the gradients are the following:\n  1) Import Parameters: Define the characteristics of the input file (e.g. column separator).\n  2) Open File: Choose the file with the data that need to be imported.\n  3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n  4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n  5) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n  6) Save File: Save the gradients into a text file.\n'''
+        helptext = '''This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.\nThe steps to calculate the gradients are the following:\n\n  1) Import Parameters: Define the characteristics of the input file. First select if it is a Sim4Life file and leave the default parameters. If it is not a Sim4Life file, then select "Other". If the file includes headers, then check "Contains headers", else un-check it. You should also select the proper separator between the columns.\n\n  2) Open File: Choose the file with the data that need to be imported. The data must contain 4 or 6 columns. The first 3 columns are the three dimensions (x,y,z). If there are 4 columns, the 4th column is the absolute value of the vector. If there are 6 columns, the last 3 columns are the magnetic field in each direction (x,y,z).\n\n  3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n\n  4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n\n  5) Check Gradient Data: A table shows the first 10 lines to check whether the gradients have been calculated correctly.\n\n  6) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n\n  7) Save File: Save the gradients into a text file.\n'''
         
-        
-        label = tk.Label(window, text=helptext, wraplength=400, justify='left', font=12).grid(row=0, column=0)
+        label = tk.Label(window, text=helptext, wraplength=700, justify='left', font=12).grid(row=0, column=0)
 
     def updateLOG(self, logtext):
         cdtm = dtm.datetime.now()
@@ -496,7 +495,8 @@ class Window(tk.Frame):
         
         settingsMenu = tk.Menu(self.parent, tearoff=0)
         settingsMenu.add_command(label='Import parameters', command=self.openParams)
-        settingsMenu.add_command(label='Edit data', command=lambda : self.checkInputData())
+        settingsMenu.add_command(label='Check Input data', command=lambda : self.checkInputData())
+        settingsMenu.add_command(label='Check Gradient data', command=lambda : self.checkGradData())
         settingsMenu.add_command(label='Save parameters', command=self.saveParams)
         menubar.add_cascade(label="Settings", menu=settingsMenu)   
 
