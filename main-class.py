@@ -14,6 +14,7 @@ import calcgrads as cg
 import time
 import tkinter.scrolledtext as st 
 import pandastable as pdt
+import datetime as dtm
 
 class Window(tk.Frame):
     
@@ -44,7 +45,7 @@ class Window(tk.Frame):
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         
-        self.log_area = st.ScrolledText(self.parent, width = 50,height = 5, font = ("Times New Roman", 11), state='disabled' )
+        self.log_area = st.ScrolledText(self.parent, width = 50,height = 5, font = ("Times New Roman", 8), state='disabled' )
         self.log_area.grid(row=10, column=0, pady = 10, padx = 10, columnspan=2)
         
         # Define input file
@@ -114,8 +115,10 @@ class Window(tk.Frame):
         label = tk.Label(window, text=helptext, wraplength=400, justify='left', font=12).grid(row=0, column=0)
 
     def updateLOG(self, logtext):
+        cdtm = dtm.datetime.now()
+        logdate = '{}/{}/{}-{}:{}:{}'.format(cdtm.day, cdtm.month, cdtm.year, cdtm.hour, cdtm.minute, cdtm.second)
         self.log_area.configure(state='normal')
-        self.log_area.insert(tk.INSERT, '{}\n'.format(logtext))    
+        self.log_area.insert(tk.INSERT, '{}: {}\n'.format(logdate, logtext))    
         self.log_area.update()
         self.log_area.yview(tk.END)
         self.log_area.configure(state='disabled')
