@@ -98,13 +98,22 @@ class Window(tk.Frame):
         -------
         None.
         '''
-        window = tk.Toplevel(self.parent)
+        window = tk.Toplevel(self.parent, width=75, height=27)
         window.title("Help")
-        window.geometry('700x500')
+        #window.geometry('700x500')
+        window.columnconfigure(0, weight=1)
+        window.rowconfigure(0, weight=1)
         
-        helptext = '''This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.\nThe steps to calculate the gradients are the following:\n\n  1) Import Parameters: Define the characteristics of the input file. First select if it is a Sim4Life file and leave the default parameters. If it is not a Sim4Life file, then select "Other". If the file includes headers, then check "Contains headers", else un-check it. You should also select the proper separator between the columns.\n\n  2) Open File: Choose the file with the data that need to be imported. The data must contain 4 or 6 columns. The first 3 columns are the three dimensions (x,y,z). If there are 4 columns, the 4th column is the absolute value of the vector. If there are 6 columns, the last 3 columns are the magnetic field in each direction (x,y,z).\n\n  3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n\n  4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n\n  5) Check Gradient Data: A table shows the first 10 lines to check whether the gradients have been calculated correctly.\n\n  6) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n\n  7) Save File: Save the gradients into a text file.\n'''
         
-        label = tk.Label(window, text=helptext, wraplength=700, justify='left', font=12).grid(row=0, column=0)
+        helptext = "This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.The steps to calculate the gradients are the following:\n\t1) Import Parameters: Define the characteristics of the input file. First select if it is a Sim4Life file and leave the default parameters. If it is not a Sim4Life file, then select 'Other'. If the file includes headers, then check 'Contains headers', else un-check it. You should also select the proper separator between the columns.\n\t2) Open File: Choose the file with the data that need to be imported. The data must contain 4 or 6 columns. The first 3 columns are the three dimensions (x,y,z). If there are 4 columns, the 4th column is the absolute value of the vector. If there are 6 columns, the last 3 columns are the magnetic field in each direction (x,y,z).\n\t3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n\t4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n\t5) Check Gradient Data: A table shows the first 10 lines to check whether the gradients have been calculated correctly.\n\t6) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n\t7) Save File: Save the gradients into a text file.\n"
+        
+        
+        label = st.ScrolledText(window, wrap=tk.WORD, width=72, height=25, font=("Times New Roman", 16) )
+        label.configure(state='normal')
+        label.grid(row=0, column=0, pady=10, padx=10, sticky='ensw')
+        label.insert(tk.INSERT, helptext)    
+        label.configure(state='disabled')
+        label.update()
 
     def updateLOG(self, logtext):
         '''
@@ -573,6 +582,7 @@ class Window(tk.Frame):
 def main():
 
     root = tk.Tk()
+    root.resizable(width=False, height=False)
     ex = Window(root)
     root.geometry("460x200")
     root.mainloop()  
