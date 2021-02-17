@@ -42,7 +42,10 @@ class Window(tk.Frame):
         self.sepsNames = {0: 'space', 1: 'comma', 2: 'tab', 3: 'semicolon'}
         self.seps = {0: ' ', 1: ',', 2: '\t', 3: ';'}
         
-        self.log_area = st.ScrolledText(self.parent, width=70, height=7, font=("Times New Roman", 8), state='disabled' )
+        logFrame = tk.LabelFrame(self.parent, text='Log')
+        logFrame.grid(row=10, column=0, pady=10, padx=10, columnspan=3)
+        
+        self.log_area = st.ScrolledText(logFrame, width=70, height=7, font=("Times New Roman", 8), state='disabled' )
         self.log_area.grid(row=10, column=0, pady=10, padx=10, columnspan=3)
         
         # Define input file
@@ -584,7 +587,8 @@ def main():
     root = tk.Tk()
     root.resizable(width=False, height=False)
     ex = Window(root)
-    root.geometry("460x200")
+    # root.geometry("460x200")
+    root.geometry("485x240")
     root.mainloop()  
 
 
