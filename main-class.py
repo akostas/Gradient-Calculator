@@ -12,6 +12,7 @@ import calcgrads as cg
 import tkinter.scrolledtext as st 
 import pandastable as pdt
 import datetime as dtm
+import dataplot as dpl
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -519,6 +520,7 @@ class Window(tk.Frame):
         else:
             options = list(self.inData.columns[3:])
         print(options)
+        myVar.set(options[0])
         yLabel = tk.Label(framePlot, text='Choose y-Axis: ')
         yLabel.grid(row=0, column=0)
         w = tk.OptionMenu(framePlot, myVar, *options)
@@ -530,8 +532,21 @@ class Window(tk.Frame):
         for num, (key, val) in enumerate(self.dataDimDict.items()):
             tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=key).grid(row=0, column=num, sticky='w')
         
+        frameSlice = tk.LabelFrame(framePlot, text='Slice')
+        frameSlice.grid(row=0, column=3)
+        tmpDimList = ['x', 'y', 'z']
+        tmpDim = self.dataDimDict[self.dataDim.get()]
+        print(tmpDim)
+        tmpDimList.remove(tmpDim.split('-')[0])
+        tmpDimList.remove(tmpDim.split('-')[1])
+        if len(self.inData)!=0:
+            limits = set(list(self.inData[tmpDimList[0]]))
+            cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
+        else:
+            cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
+        cslider.grid()
         
-        def myPlot(data, yax):
+        def myPlot(data, yax, uaxis, cslice, scale):
             # Figure
             window = tk.Toplevel(self.parent)
             frameFig = tk.Frame(window)
@@ -545,19 +560,38 @@ class Window(tk.Frame):
             #a = fig.add_subplot(111)
             ax = fig.subplots()
             
+            dpl.createPlot(fig, ax, uaxis, yax, cslice, data, scale)
+            
             frameToolbar = tk.Frame(master=window)
             frameToolbar.grid(row=4,column=0)
             toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
+            toolbar.grid(row=0, column=0, columnspan=2)
+            
+            def savePlot(fig):
+                ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
+                tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+                if tmp != '':
+                    dpl.saveFig(fig, tmp)
+            
+            b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(fig), width=20)
+            b2.grid(row=0, column=2)
 
             
         # Buttons to plot and save
         frameBut = tk.Frame(framePlot)
-        frameBut.grid(row=0, column=3)
-        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(self.inData, myVar))
+        frameBut.grid(row=0, column=4)
+        print(myVar.get(), tmpDim, cslider.get())
+        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(self.inData, myVar.get(), tmpDim, cslider.get(), 'linear'))
         b1.grid(row=0, column=0)
         
-        b2 = tk.Button(frameBut, text='Save')
-        b2.grid(row=0, column=1)
+        '''def savePlot(fig):
+            ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
+            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+            if tmp != '':
+                dpl.saveFig(fig, tmp)
+        
+        b2 = tk.Button(frameBut, text='Save', command=lambda:savePlot(fig))
+        b2.grid(row=0, column=1)'''
 
     
 
@@ -606,7 +640,11 @@ class Window(tk.Frame):
             
         
         def savePlot(fig):
-            fig.savefig('thisisatest.png', format='png', dpi=300, bbox_inches='tight')
+            ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
+            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+            if tmp != '':
+                dpl.saveFig(fig, tmp)
+            #fig.savefig('thisisatest.png', format='png', dpi=300, bbox_inches='tight')
 
         window = tk.Toplevel(self.parent)
         window.title("Plot gradients")
@@ -656,6 +694,15 @@ class Window(tk.Frame):
         frameToolbar.grid(row=4,column=0)
         toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
         
+        frameSlice = tk.LabelFrame(window, text='Slice')
+        frameSlice.grid(row=5, column=4)
+        tmpDimList = ['x', 'y', 'z']
+        tmpDim = self.dataDim.get()
+        tmpDimList.remove(tmpDim.split('-')[0])
+        tmpDimList.remove(tmpDim.split('-')[1])
+        limits = set(list(self.inData[tmpDimList[0]]))
+        cslider = tk.Scale(frameSlice, from_=min(limits), to=max(limits), orient=HORIZONTAL)
+        cslider.grid()
         
         # Buttons to plot and save
         frameBut = tk.Frame(window)
