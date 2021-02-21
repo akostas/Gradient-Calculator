@@ -73,7 +73,7 @@ class Window(tk.Frame):
         # Plot variable
         self.yax = tk.StringVar()
         self.options = ['']
-                
+        
         self.initUI()
 
     def readFile(self, filename):
@@ -185,6 +185,9 @@ class Window(tk.Frame):
 
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
+            
+            # Set that data have been imported
+            self.dataExist.set('normal')
         else:
             self.updateLOG('No file has been provided')
 
@@ -509,16 +512,18 @@ class Window(tk.Frame):
         pt.model.df = tmp
         pt.show()
         
+        # Plot options
         framePlot = tk.LabelFrame(window, text='Plot')
         framePlot.grid(row=1, column=0, columnspan=4)
         
+        # Variable for Z axis
         myVar = tk.StringVar()
         myVar.set('')
         
-        if len(self.inData)==0:
+        if len(data)==0:
             options = ['1', '2', '3']
         else:
-            options = list(self.inData.columns[3:])
+            options = list(data.columns[3:])
         print(options)
         myVar.set(options[0])
         yLabel = tk.Label(framePlot, text='Choose y-Axis: ')
@@ -539,8 +544,8 @@ class Window(tk.Frame):
         print(tmpDim)
         tmpDimList.remove(tmpDim.split('-')[0])
         tmpDimList.remove(tmpDim.split('-')[1])
-        if len(self.inData)!=0:
-            limits = set(list(self.inData[tmpDimList[0]]))
+        if len(data)!=0:
+            limits = set(list(data[tmpDimList[0]]))
             cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
         else:
             cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
@@ -581,7 +586,7 @@ class Window(tk.Frame):
         frameBut = tk.Frame(framePlot)
         frameBut.grid(row=0, column=4)
         print(myVar.get(), tmpDim, cslider.get())
-        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(self.inData, myVar.get(), tmpDim, cslider.get(), 'linear'))
+        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), tmpDim, cslider.get(), 'linear'))
         b1.grid(row=0, column=0)
         
         '''def savePlot(fig):
@@ -617,12 +622,14 @@ class Window(tk.Frame):
                 self.updateLOG('Gradients have been calculated')
                 print('They have been calculated')
                 print(self.gradData.head(10))
+                # Set that the gradients have been calculated
+                self.gradExist.set('normal')
             else:
                 self.updateLOG('ERROR!!!Check Help->Information for proper input files!')
         else:
             self.updateLOG('!!!No input data!!!')
 
-    def plotFields(self):
+    """def plotFields(self):
         
         def myplot(ax, canvas):
             ax.clear()
@@ -711,7 +718,7 @@ class Window(tk.Frame):
         b1.grid(row=0, column=0)
         
         b2 = tk.Button(frameBut, text='Save', command=lambda:savePlot(fig))
-        b2.grid(row=0, column=1)
+        b2.grid(row=0, column=1)"""
         
         
 
@@ -770,9 +777,9 @@ class Window(tk.Frame):
         checkGradButton = tk.Button(self.parent, text="Check Gradient Data", command=lambda : self.checkData(self.gradData), width=15)
         checkGradButton.grid(row=mrow + 1, column=1)
         
-        # Plot data
+        '''# Plot data
         plotDataButton = tk.Button(self.parent, text="Plot Data", command=self.plotFields, width=15)
-        plotDataButton.grid(row=mrow + 1, column=2)
+        plotDataButton.grid(row=mrow + 1, column=2)'''
         
         
         
