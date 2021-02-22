@@ -68,6 +68,7 @@ expl['gbzz2'] = r'$\sqrt{\left( \frac{\partial B_z}{\partial z}\right)^2}$'
 # gB='Vec'       
 
 def createPlot(fig, ax, uaxis, gB, cslice, data, scale='linear'):
+ 
     tmp = ['x', 'y', 'z']
     x = uaxis.split('-')[0]
     y = uaxis.split('-')[1]

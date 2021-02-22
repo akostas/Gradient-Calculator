@@ -252,6 +252,91 @@ def grad_dir(data):
 
     return grad
 
+def gradAny(data):
+    '''
+    Calculate the gradients for any number of columns (values for each 
+    direction).
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Contains the magnetic field (input data).
+
+    Returns
+    -------
+    grad : pandas.DataFrame
+        Contains the gradients of the magnetic field.
+
+    '''
+    # Assign the headers names to variables for better handling
+    names = list(data.columns)
+    b = '|B|'
+    names.append(b)
+    
+    data[b] = 0
+    for head in names[3:-1]:
+        data[b] += data[head]**2
+    data[b] = np.sqrt(data[b])
+    
+    
+    x = data.columns[0]
+    y = data.columns[1]
+    z = data.columns[2]
+    # bx = data.columns[3]
+    # by = data.columns[4]
+    # bz = data.columns[5]
+    # b = '|B|'
+    
+    # Calculate |B|
+    # data[b] = np.sqrt(data[bx]**2 + data[by]**2 + data[bz]**2)   
+    
+    sorval = [([z, y, x], x), ([z, x, y], y), ([y, x, z], z)]
+    
+    def cgrad(sval, data):
+        # Calculate the gradient on the sval[1] dimension
+        data.sort_values(by=sval[0], inplace=True)
+        tmplist = []
+        for col in data.columns[3:]:
+            tmp = np.gradient(data[col], data[sval[1]], edge_order=2)
+            tmplist.append(tmp)
+        dataI = list(data.index)
+        # Sort based on the index of the rows
+        tmplist2 = []
+        for i in range(len(tmplist)):
+            tmp = sorted(list(zip(dataI, tmplist[i])), key=lambda l:l[0], reverse=False)
+            tmplist2.append(tmp)
+        return tmplist2
+    
+    nlists = []
+    for item in sorval:
+        nlists.extend(cgrad(item, data))
+    
+    # they need to be placed in the right order
+    nlists2
+
+    # Create the gradients database headers
+    gheaders = [x, y, z]
+    for i in list(data.columns)[3:]:
+        for j in [x, y, z]:
+            gheaders.append('g{}{}'.format(i.replace('Re-', ''), j))
+
+    # Create the gradients database
+    grad = pd.DataFrame(columns=gheaders)
+
+    data.sort_index(inplace=True)
+    
+    # Get the values of the 3 dimensions from the input data
+    grad[x] = data[x].copy()
+    grad[y] = data[y].copy()
+    grad[z] = data[z].copy()
+
+    # Fill the gradients DataFrame
+    ml = [gbxxI, gbxyI, gbxzI, gbyxI, gbyyI, gbyzI, gbzxI, gbzyI, gbzzI, gbxI, gbyI, gbzI]
+    for num, i in enumerate(list(grad.columns)[3:]):
+        grad[i] = [row[1] for row in ml[num]]
+
+    return grad
+
 def Grads(data):
     '''
     Choose the proper function to calculate the gradients.

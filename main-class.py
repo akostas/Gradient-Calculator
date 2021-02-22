@@ -185,9 +185,6 @@ class Window(tk.Frame):
 
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
-            
-            # Set that data have been imported
-            self.dataExist.set('normal')
         else:
             self.updateLOG('No file has been provided')
 
@@ -535,9 +532,9 @@ class Window(tk.Frame):
         frameDim = tk.LabelFrame(framePlot, text='Plane')
         frameDim.grid(row=0, column=2)
         for num, (key, val) in enumerate(self.dataDimDict.items()):
-            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=key).grid(row=0, column=num, sticky='w')
+            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')
         
-        frameSlice = tk.LabelFrame(framePlot, text='Slice')
+        '''frameSlice = tk.LabelFrame(framePlot, text='Slice')
         frameSlice.grid(row=0, column=3)
         tmpDimList = ['x', 'y', 'z']
         tmpDim = self.dataDimDict[self.dataDim.get()]
@@ -549,26 +546,67 @@ class Window(tk.Frame):
             cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
         else:
             cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
-        cslider.grid()
+        cslider.grid()'''
         
-        def myPlot(data, yax, uaxis, cslice, scale):
+        def myPlot(data, yax, uaxis, scale, cslice):
+            print(yax)
+            print(uaxis)
+            
             # Figure
             window = tk.Toplevel(self.parent)
+            window.title('Figure')
+            
+            # Slider
+            frameSlice = tk.LabelFrame(window, text='Slice')
+            frameSlice.grid(row=0, column=0, columnspan=3)
+            tmpDimList = ['x', 'y', 'z']
+            tmpDim = self.dataDimDict[self.dataDim.get()]
+            print(tmpDim)
+            tmpDimList.remove(tmpDim.split('-')[0])
+            tmpDimList.remove(tmpDim.split('-')[1])
+            
+            if len(data)!=0:
+                limits = set(list(data[tmpDimList[0]]))
+                cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
+            else:
+                cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
+            cslider.grid()
+                
+            def createFig():
+                fig = Figure(dpi=80)
+                fig.set_size_inches(6.5, 5.2)
+                canvas = FigureCanvasTkAgg(fig, master=frameFig)
+                canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
+                return fig, canvas
+            
             frameFig = tk.Frame(window)
-            frameFig.grid(row=0, column=0, columnspan=3)
+            frameFig.grid(row=1, column=0, columnspan=3)
             
-            fig = Figure(dpi=100)
-            fig.set_size_inches(6, 4.8)
+            # fig = Figure(dpi=100)
+            # fig.set_size_inches(5.5, 4.5)
+            fig, canvas = createFig()
             
-            canvas = FigureCanvasTkAgg(fig, master=frameFig)
-            canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
+            # canvas = FigureCanvasTkAgg(fig, master=frameFig)
+            # canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
             #a = fig.add_subplot(111)
             ax = fig.subplots()
             
-            dpl.createPlot(fig, ax, uaxis, yax, cslice, data, scale)
+            def UpdateButton(fig, ax, uaxis, yax, cslice, data, scale):
+                fig.clf()
+                fig, canvas = createFig()
+                ax = fig.subplots()
+                dpl.createPlot(fig, ax, uaxis, yax, cslice, data, scale)
+                canvas.draw()
             
+            
+            dpl.createPlot(fig, ax, uaxis, yax, cslider.get(), data, scale)
+            
+            updateBut = tk.Button(frameSlice, text='Update plot', command=lambda:UpdateButton(fig, ax, uaxis, yax, cslider.get(), data, scale))
+            updateBut.grid(row=0, column=4)
+            
+            canvas.draw()
             frameToolbar = tk.Frame(master=window)
-            frameToolbar.grid(row=4,column=0)
+            frameToolbar.grid(row=2,column=0)
             toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
             toolbar.grid(row=0, column=0, columnspan=2)
             
@@ -585,8 +623,7 @@ class Window(tk.Frame):
         # Buttons to plot and save
         frameBut = tk.Frame(framePlot)
         frameBut.grid(row=0, column=4)
-        print(myVar.get(), tmpDim, cslider.get())
-        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), tmpDim, cslider.get(), 'linear'))
+        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), self.dataDimDict[self.dataDim.get()], 'linear', 0))
         b1.grid(row=0, column=0)
         
         '''def savePlot(fig):
@@ -622,8 +659,6 @@ class Window(tk.Frame):
                 self.updateLOG('Gradients have been calculated')
                 print('They have been calculated')
                 print(self.gradData.head(10))
-                # Set that the gradients have been calculated
-                self.gradExist.set('normal')
             else:
                 self.updateLOG('ERROR!!!Check Help->Information for proper input files!')
         else:
