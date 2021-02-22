@@ -74,6 +74,8 @@ class Window(tk.Frame):
         self.yax = tk.StringVar()
         self.options = ['']
         
+        self.fig = ''
+        
         self.initUI()
 
     def readFile(self, filename):
@@ -203,7 +205,7 @@ class Window(tk.Frame):
 
             # Define file types
             ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
-            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+            tmp = filedialog.asksaveasfilename(defaultextension=('Text files', '*.txt'), initialdir = "/",title = "Select file",filetypes = ftypes)
             if tmp != '':
                 self.outfile.set(tmp)
                 print(self.outfile.get())
@@ -584,24 +586,25 @@ class Window(tk.Frame):
             
             # fig = Figure(dpi=100)
             # fig.set_size_inches(5.5, 4.5)
-            fig, canvas = createFig()
+            self.fig, canvas = createFig()
             
             # canvas = FigureCanvasTkAgg(fig, master=frameFig)
             # canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
             #a = fig.add_subplot(111)
-            ax = fig.subplots()
+            ax = self.fig.subplots()
             
-            def UpdateButton(fig, ax, uaxis, yax, cslice, data, scale):
-                fig.clf()
-                fig, canvas = createFig()
-                ax = fig.subplots()
-                dpl.createPlot(fig, ax, uaxis, yax, cslice, data, scale)
+            #def UpdateButton(fig, ax, uaxis, yax, cslice, data, scale):
+            def UpdateButton(uaxis, yax, cslice, data, scale):
+                self.fig.clf()
+                self.fig, canvas = createFig()
+                ax = self.fig.subplots()
+                dpl.createPlot(self.fig, ax, uaxis, yax, cslice, data, scale)
                 canvas.draw()
             
             
-            dpl.createPlot(fig, ax, uaxis, yax, cslider.get(), data, scale)
+            dpl.createPlot(self.fig, ax, uaxis, yax, cslider.get(), data, scale)
             
-            updateBut = tk.Button(frameSlice, text='Update plot', command=lambda:UpdateButton(fig, ax, uaxis, yax, cslider.get(), data, scale))
+            updateBut = tk.Button(frameSlice, text='Update plot', command=lambda:UpdateButton(uaxis, yax, cslider.get(), data, scale))
             updateBut.grid(row=0, column=4)
             
             canvas.draw()
@@ -610,13 +613,14 @@ class Window(tk.Frame):
             toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
             toolbar.grid(row=0, column=0, columnspan=2)
             
-            def savePlot(fig):
-                ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
-                tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
+            def savePlot():
+                ftypes = [('JPG', '*.jpg'), ('JPEG', '*.jpeg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('PDF', '*.pdf'), ('All files', '*')]
+                tmp = filedialog.asksaveasfilename(defaultextension=('JPG', '*.jpg'), initialdir = "/", title = "Select file", filetypes = ftypes)
                 if tmp != '':
-                    dpl.saveFig(fig, tmp)
+                    dpl.saveFig(self.fig, tmp)
             
-            b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(fig), width=20)
+            #b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(fig), width=20)
+            b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(), width=20)
             b2.grid(row=0, column=2)
 
             

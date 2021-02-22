@@ -30,7 +30,7 @@ def createGrid(data, x, y, gB, scale='linear'):
 
 def saveFig(fig, filename):
     cformat = filename.split('.')[-1]
-    fname = filename.split('.')[:-1]
+    fname = ".".join(filename.split('.')[:-1])
     fig.savefig('{}.{}'.format(fname, cformat), format=cformat, dpi=300, bbox_inches='tight')
 
 
@@ -110,6 +110,7 @@ def createPlot(fig, ax, uaxis, gB, cslice, data, scale='linear'):
         fig.colorbar(psm, ax=ax).set_label(label='{}(T/m)'.format(gB), size=20)
     else:
         fig.colorbar(psm, ax=ax).set_label(label='{}(db)'.format(gB), size=20)
+    fig.tight_layout()
     
 
 
