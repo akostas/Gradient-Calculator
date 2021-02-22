@@ -34,39 +34,6 @@ def saveFig(fig, filename):
     fig.savefig('{}.{}'.format(fname, cformat), format=cformat, dpi=300, bbox_inches='tight')
 
 
-#dmsions = ['x', 'y', 'z']
-
-'''
-data['gb2'] = np.sqrt( (data['gbxx']+data['gbyx']+data['gbzx'])**2 + (data['gbxy']+data['gbyy']+data['gbzy'])**2 + (data['gbxz']+data['gbyz']+data['gbzz'])**2 )
-
-data['gbx'] = np.sqrt( data['gbxx']**2 + data['gbyx']**2 + data['gbzx']**2 )
-data['gby'] = np.sqrt( data['gbxy']**2 + data['gbyy']**2 + data['gbzy']**2 )
-data['gbz'] = np.sqrt( data['gbxz']**2 + data['gbyz']**2 + data['gbzz']**2 )
-data['gbzz2'] = np.sqrt(data['gbzz']**2)
-data['gbxx2'] = np.sqrt(data['gbxx']**2)
-data['gbyy2'] = np.sqrt(data['gbyy']**2)
-
-grads = ['gbxx2', 'gbyy2']
-
-grads = ['gb2', 'gbx', 'gby', 'gbz', 'gbzz2', 'gbxx2', 'gbyy2']
-'''
-'''
-expl = {}
-expl['gb2'] = r'$\vec{G}=\sqrt{\left( \frac{\partial B_x}{\partial x} + \frac{\partial B_y}{\partial x} + \frac{\partial B_z}{\partial x}\right)^2 +\left( \frac{\partial B_x}{\partial y} + \frac{\partial B_y}{\partial y} + \frac{\partial B_z}{\partial y}\right)^2 +\left( \frac{\partial B_x}{\partial z} + \frac{\partial B_y}{\partial z} + \frac{\partial B_z}{\partial z}\right)^2}$'
-expl['gbx'] = r'$\sqrt{\left( \frac{\partial B_x}{\partial x} + \frac{\partial B_y}{\partial x} + \frac{\partial B_z}{\partial x}\right)^2}$'
-expl['gby'] = r'$\sqrt{\left( \frac{\partial B_x}{\partial y} + \frac{\partial B_y}{\partial y} + \frac{\partial B_z}{\partial y}\right)^2}$'
-expl['gbz'] = r'$\sqrt{\left( \frac{\partial B_x}{\partial z} + \frac{\partial B_y}{\partial z} + \frac{\partial B_z}{\partial z}\right)^2}$'
-expl['gbxx2'] = r'$\sqrt{\left( \frac{\partial B_x}{\partial x}\right)^2}$'
-expl['gbyy2'] = r'$\sqrt{\left( \frac{\partial B_y}{\partial y}\right)^2}$'
-expl['gbzz2'] = r'$\sqrt{\left( \frac{\partial B_z}{\partial z}\right)^2}$'
-'''
-        
-# Create a 2D image -> select x-, y- axis and the third axis that will 
-# provide the proper color (B, gradient, Eddy)
-# x='x'
-# y='z'
-# gB='Vec'       
-
 def createPlot(fig, ax, uaxis, gB, cslice, data, scale='linear'):
  
     tmp = ['x', 'y', 'z']

@@ -536,20 +536,6 @@ class Window(tk.Frame):
         for num, (key, val) in enumerate(self.dataDimDict.items()):
             tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')
         
-        '''frameSlice = tk.LabelFrame(framePlot, text='Slice')
-        frameSlice.grid(row=0, column=3)
-        tmpDimList = ['x', 'y', 'z']
-        tmpDim = self.dataDimDict[self.dataDim.get()]
-        print(tmpDim)
-        tmpDimList.remove(tmpDim.split('-')[0])
-        tmpDimList.remove(tmpDim.split('-')[1])
-        if len(data)!=0:
-            limits = set(list(data[tmpDimList[0]]))
-            cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
-        else:
-            cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
-        cslider.grid()'''
-        
         def myPlot(data, yax, uaxis, scale, cslice):
             print(yax)
             print(uaxis)
@@ -584,13 +570,8 @@ class Window(tk.Frame):
             frameFig = tk.Frame(window)
             frameFig.grid(row=1, column=0, columnspan=3)
             
-            # fig = Figure(dpi=100)
-            # fig.set_size_inches(5.5, 4.5)
             self.fig, canvas = createFig()
             
-            # canvas = FigureCanvasTkAgg(fig, master=frameFig)
-            # canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
-            #a = fig.add_subplot(111)
             ax = self.fig.subplots()
             
             #def UpdateButton(fig, ax, uaxis, yax, cslice, data, scale):
@@ -629,17 +610,6 @@ class Window(tk.Frame):
         frameBut.grid(row=0, column=4)
         b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), self.dataDimDict[self.dataDim.get()], 'linear', 0))
         b1.grid(row=0, column=0)
-        
-        '''def savePlot(fig):
-            ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
-            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
-            if tmp != '':
-                dpl.saveFig(fig, tmp)
-        
-        b2 = tk.Button(frameBut, text='Save', command=lambda:savePlot(fig))
-        b2.grid(row=0, column=1)'''
-
-    
 
 
 
@@ -658,106 +628,21 @@ class Window(tk.Frame):
             self.updateLOG('Now calculating gradients')
             print('Now calculating gradients.')
             # Check if the imported data is of the proper format
-            if len(self.inData.columns)==4 or len(self.inData.columns)==6:
+            self.gradData = cg.Grads(self.inData)
+            self.updateLOG('Gradients have been calculated')
+            print('They have been calculated')
+            print(self.gradData.head(10))
+            '''if len(self.inData.columns)==4 or len(self.inData.columns)==6:
                 self.gradData = cg.Grads(self.inData)
                 self.updateLOG('Gradients have been calculated')
                 print('They have been calculated')
                 print(self.gradData.head(10))
             else:
-                self.updateLOG('ERROR!!!Check Help->Information for proper input files!')
+                self.updateLOG('ERROR!!!Check Help->Information for proper input files!')'''
         else:
             self.updateLOG('!!!No input data!!!')
 
-    """def plotFields(self):
-        
-        def myplot(ax, canvas):
-            ax.clear()
-            
-            x = [i for i in range(10)]
-            y = [i*i for i in range(10)]
-            
-            ax.plot(x, y)
-            
-            
-            tit = self.dataDimDict[self.dataDim.get()]
-            ax.set_title(tit)
-            
-            canvas.draw()
-            
-        
-        def savePlot(fig):
-            ftypes = [('JPG', '*.jpg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('All files', '*')]
-            tmp = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
-            if tmp != '':
-                dpl.saveFig(fig, tmp)
-            #fig.savefig('thisisatest.png', format='png', dpi=300, bbox_inches='tight')
-
-        window = tk.Toplevel(self.parent)
-        window.title("Plot gradients")
-        window.geometry('600x570')
-             
-        # Choose which database to plot
-        frameData = tk.LabelFrame(window, text='Database')
-        frameData.grid(row=0, column=0)
-        fdb1 = tk.Radiobutton(frameData, text='Magnetic field', variable=self.dataPlot, value=0)
-        fdb1.grid(row=0, column=0)
-        fdb2 = tk.Radiobutton(frameData, text='Gradients', variable=self.dataPlot, value=1)
-        fdb2.grid(row=0, column=1)
-        
-        #options = ['']
-        if self.dataPlot.get()==0 and len(self.inData)!=0:
-            self.options = list(self.inData.columns[3:])
-        elif self.dataPlot.get()==1 and len(self.gradData)!=0:
-            self.options = list(self.gradData.columns[3:])
-        
-        w = tk.OptionMenu(frameData, self.yax, *self.options)
-        w.grid(row=1, column=0, columnspan=2)
-        
-        #self.yax.set(options[0])
-        
-        
-        
-        # Choose which Dimension to plot
-        frameDim = tk.LabelFrame(window, text='Plane')
-        frameDim.grid(row=0, column=1)
-        for num, (key, val) in enumerate(self.dataDimDict.items()):
-            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=key).grid(row=0, column=num, sticky='w')
-        
-        
-        # Figure
-        frameFig = tk.Frame(window)
-        frameFig.grid(row=3, column=0, columnspan=3)
-        #fig = Figure(plt.figsize(6,5), dpi=100)
-        fig = Figure(dpi=100)
-        fig.set_size_inches(6, 4.8)
-        
-        canvas = FigureCanvasTkAgg(fig, master=frameFig)
-        canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
-        #a = fig.add_subplot(111)
-        ax = fig.subplots()
-        
-        frameToolbar = tk.Frame(master=window)
-        frameToolbar.grid(row=4,column=0)
-        toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
-        
-        frameSlice = tk.LabelFrame(window, text='Slice')
-        frameSlice.grid(row=5, column=4)
-        tmpDimList = ['x', 'y', 'z']
-        tmpDim = self.dataDim.get()
-        tmpDimList.remove(tmpDim.split('-')[0])
-        tmpDimList.remove(tmpDim.split('-')[1])
-        limits = set(list(self.inData[tmpDimList[0]]))
-        cslider = tk.Scale(frameSlice, from_=min(limits), to=max(limits), orient=HORIZONTAL)
-        cslider.grid()
-        
-        # Buttons to plot and save
-        frameBut = tk.Frame(window)
-        frameBut.grid(row=0, column=2)
-        b1 = tk.Button(frameBut, text='Plot', command=lambda:myplot(ax, canvas))
-        b1.grid(row=0, column=0)
-        
-        b2 = tk.Button(frameBut, text='Save', command=lambda:savePlot(fig))
-        b2.grid(row=0, column=1)"""
+    
         
         
 
@@ -815,12 +700,6 @@ class Window(tk.Frame):
         # Check gradients data button
         checkGradButton = tk.Button(self.parent, text="Check Gradient Data", command=lambda : self.checkData(self.gradData), width=15)
         checkGradButton.grid(row=mrow + 1, column=1)
-        
-        '''# Plot data
-        plotDataButton = tk.Button(self.parent, text="Plot Data", command=self.plotFields, width=15)
-        plotDataButton.grid(row=mrow + 1, column=2)'''
-        
-        
         
         # Saved file button
         saveButton = tk.Button(self.parent, text="Save file", command=self.saveFile, width=15)

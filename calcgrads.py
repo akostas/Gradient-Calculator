@@ -268,72 +268,38 @@ def gradAny(data):
         Contains the gradients of the magnetic field.
 
     '''
-    # Assign the headers names to variables for better handling
+    
     names = list(data.columns)
-    b = '|B|'
-    names.append(b)
-    
-    data[b] = 0
-    for head in names[3:-1]:
-        data[b] += data[head]**2
-    data[b] = np.sqrt(data[b])
-    
-    
+    if len(names)>4:
+        b = '|B|'
+        names.append(b)
+        
+        data[b] = 0
+        for head in names[3:-1]:
+            data[b] += data[head]**2
+        data[b] = np.sqrt(data[b])
+        
     x = data.columns[0]
     y = data.columns[1]
     z = data.columns[2]
-    # bx = data.columns[3]
-    # by = data.columns[4]
-    # bz = data.columns[5]
-    # b = '|B|'
-    
-    # Calculate |B|
-    # data[b] = np.sqrt(data[bx]**2 + data[by]**2 + data[bz]**2)   
     
     sorval = [([z, y, x], x), ([z, x, y], y), ([y, x, z], z)]
+    grad = pd.concat([data[x], data[y], data[z]], axis=1, ignore_index=False)
     
     def cgrad(sval, data):
+        tripleDF = pd.DataFrame()
         # Calculate the gradient on the sval[1] dimension
         data.sort_values(by=sval[0], inplace=True)
+        dataI = list(data.index)
         tmplist = []
         for col in data.columns[3:]:
             tmp = np.gradient(data[col], data[sval[1]], edge_order=2)
-            tmplist.append(tmp)
-        dataI = list(data.index)
-        # Sort based on the index of the rows
-        tmplist2 = []
-        for i in range(len(tmplist)):
-            tmp = sorted(list(zip(dataI, tmplist[i])), key=lambda l:l[0], reverse=False)
-            tmplist2.append(tmp)
-        return tmplist2
+            tmpDF = pd.DataFrame({'g{}{}'.format(sval[1],col): tmp}, index=dataI)
+            tripleDF = pd.concat([tripleDF, tmpDF], axis=1, ignore_index=False)
+        return tripleDF
     
-    nlists = []
     for item in sorval:
-        nlists.extend(cgrad(item, data))
-    
-    # they need to be placed in the right order
-    nlists2
-
-    # Create the gradients database headers
-    gheaders = [x, y, z]
-    for i in list(data.columns)[3:]:
-        for j in [x, y, z]:
-            gheaders.append('g{}{}'.format(i.replace('Re-', ''), j))
-
-    # Create the gradients database
-    grad = pd.DataFrame(columns=gheaders)
-
-    data.sort_index(inplace=True)
-    
-    # Get the values of the 3 dimensions from the input data
-    grad[x] = data[x].copy()
-    grad[y] = data[y].copy()
-    grad[z] = data[z].copy()
-
-    # Fill the gradients DataFrame
-    ml = [gbxxI, gbxyI, gbxzI, gbyxI, gbyyI, gbyzI, gbzxI, gbzyI, gbzzI, gbxI, gbyI, gbzI]
-    for num, i in enumerate(list(grad.columns)[3:]):
-        grad[i] = [row[1] for row in ml[num]]
+        grad = pd.concat([grad, cgrad(item, data)], axis=1, ignore_index=False)
 
     return grad
 
@@ -352,10 +318,11 @@ def Grads(data):
         Contains the gradients data.
 
     '''
-    if len(data.columns)==4:
+    grad = gradAny(data)
+    '''if len(data.columns)==4:
         grad = grad_B_(data)
     elif len(data.columns)==6:
         grad = grad_dir(data)
     else:
-        return -1
+        return -1'''
     return grad
