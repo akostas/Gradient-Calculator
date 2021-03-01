@@ -95,7 +95,17 @@ class Window(tk.Frame):
         if self.inSource.get() == 1:
             data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
         else:
-            data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
+            if self.conHeaders.get()==1:
+                data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
+            else:
+                data = pd.read_csv(filename, header=None, sep=self.seps[self.sepIn.get()], encoding='utf8')
+                cols = len(data.columns)
+                if cols==4:
+                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'B'}, inplace=True)
+                elif cols==6:
+                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz'}, inplace=True)
+                elif cols==7:
+                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz', 6: 'B'}, inplace=True)
         return data
     
     
@@ -533,8 +543,14 @@ class Window(tk.Frame):
         # Choose which Dimension to plot
         frameDim = tk.LabelFrame(framePlot, text='Plane')
         frameDim.grid(row=0, column=2)
-        for num, (key, val) in enumerate(self.dataDimDict.items()):
-            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')
+        """for num, (key, val) in enumerate(self.dataDimDict.items()):
+            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')"""
+        tmptext = []
+        for i in range(3):
+            for j in range(i+1,3):
+                tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
+        for num in range(3):            
+            tk.Radiobutton(frameDim, text=tmptext[num], variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')
         
         def myPlot(data, yax, uaxis, scale, cslice):
             print(yax)
@@ -547,8 +563,14 @@ class Window(tk.Frame):
             # Slider
             frameSlice = tk.LabelFrame(window, text='Slice')
             frameSlice.grid(row=0, column=0, columnspan=3)
-            tmpDimList = ['x', 'y', 'z']
-            tmpDim = self.dataDimDict[self.dataDim.get()]
+            """tmpDimList = ['x', 'y', 'z']
+            tmpDim = self.dataDimDict[self.dataDim.get()]"""
+            tmpDimList = [str(data.columns[0]), str(data.columns[1]), str(data.columns[2])]
+            tmptext = []
+            for i in range(3):
+                for j in range(i+1,3):
+                    tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
+            tmpDim = tmptext[self.dataDim.get()]      
             print(tmpDim)
             tmpDimList.remove(tmpDim.split('-')[0])
             tmpDimList.remove(tmpDim.split('-')[1])
@@ -608,7 +630,8 @@ class Window(tk.Frame):
         # Buttons to plot and save
         frameBut = tk.Frame(framePlot)
         frameBut.grid(row=0, column=4)
-        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), self.dataDimDict[self.dataDim.get()], 'linear', 0))
+        #b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), self.dataDimDict[self.dataDim.get()], 'linear', 0))
+        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), tmptext[self.dataDim.get()], 'linear', 0))
         b1.grid(row=0, column=0)
 
 
