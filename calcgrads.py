@@ -252,6 +252,57 @@ def grad_dir(data):
 
     return grad
 
+def gradAny(data):
+    '''
+    Calculate the gradients for any number of columns (values for each 
+    direction).
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Contains the magnetic field (input data).
+
+    Returns
+    -------
+    grad : pandas.DataFrame
+        Contains the gradients of the magnetic field.
+
+    '''
+    
+    names = list(data.columns)
+    if len(names)>4:
+        b = '|B|'
+        names.append(b)
+        
+        data[b] = 0
+        for head in names[3:-1]:
+            data[b] += data[head]**2
+        data[b] = np.sqrt(data[b])
+        
+    x = data.columns[0]
+    y = data.columns[1]
+    z = data.columns[2]
+    
+    sorval = [([z, y, x], x), ([z, x, y], y), ([y, x, z], z)]
+    grad = pd.concat([data[x], data[y], data[z]], axis=1, ignore_index=False)
+    
+    def cgrad(sval, data):
+        tripleDF = pd.DataFrame()
+        # Calculate the gradient on the sval[1] dimension
+        data.sort_values(by=sval[0], inplace=True)
+        dataI = list(data.index)
+        tmplist = []
+        for col in data.columns[3:]:
+            tmp = np.gradient(data[col], data[sval[1]], edge_order=2)
+            tmpDF = pd.DataFrame({'g{}{}'.format(sval[1],col): tmp}, index=dataI)
+            tripleDF = pd.concat([tripleDF, tmpDF], axis=1, ignore_index=False)
+        return tripleDF
+    
+    for item in sorval:
+        grad = pd.concat([grad, cgrad(item, data)], axis=1, ignore_index=False)
+
+    return grad
+
 def Grads(data):
     '''
     Choose the proper function to calculate the gradients.
@@ -267,10 +318,11 @@ def Grads(data):
         Contains the gradients data.
 
     '''
-    if len(data.columns)==4:
+    grad = gradAny(data)
+    '''if len(data.columns)==4:
         grad = grad_B_(data)
     elif len(data.columns)==6:
         grad = grad_dir(data)
     else:
-        return -1
+        return -1'''
     return grad
