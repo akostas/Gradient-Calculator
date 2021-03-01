@@ -525,8 +525,8 @@ class Window(tk.Frame):
             options = list(data.columns[3:])
         print(options)
         myVar.set(options[0])
-        yLabel = tk.Label(framePlot, text='Choose y-Axis: ')
-        yLabel.grid(row=0, column=0)
+        zLabel = tk.Label(framePlot, text='Choose z-Axis: ')
+        zLabel.grid(row=0, column=0)
         w = tk.OptionMenu(framePlot, myVar, *options)
         w.grid(row=0, column=1)
 
