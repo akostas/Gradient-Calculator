@@ -33,6 +33,8 @@ class Window(tk.Frame):
         # Open parameters        
         self.sepIn = tk.IntVar() # Separator for input file
         self.sepIn.set(2)
+        self.sepMulti = tk.BooleanVar() # If the separator is repeated multiple times
+        self.sepMulti.set(False)
         self.ird = tk.IntVar() # Initial rows to delete
         self.ird.set(20)
         
@@ -92,20 +94,22 @@ class Window(tk.Frame):
         data : pandas.DataFrame
             Contains the input data (Magnetic field).
         '''
-        if self.inSource.get() == 1:
-            data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
-        else:
-            if self.conHeaders.get()==1:
-                data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
-            else:
-                data = pd.read_csv(filename, header=None, sep=self.seps[self.sepIn.get()], encoding='utf8')
-                cols = len(data.columns)
-                if cols==4:
-                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'B'}, inplace=True)
-                elif cols==6:
-                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz'}, inplace=True)
-                elif cols==7:
-                    data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz', 6: 'B'}, inplace=True)
+        # if self.inSource.get() == 1:
+        #     data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
+        # else:
+        #     if self.conHeaders.get()==1:
+        #         data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
+        #     else:
+        #         data = pd.read_csv(filename, header=None, sep=self.seps[self.sepIn.get()], encoding='utf8')
+        #         cols = len(data.columns)
+        #         if cols==4:
+        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'B'}, inplace=True)
+        #         elif cols==6:
+        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz'}, inplace=True)
+        #         elif cols==7:
+        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz', 6: 'B'}, inplace=True)
+        data = cg.readData(filename, int(self.ird.get()), self.conHeaders.get(), self.sepMulti.get() ,self.seps[self.sepIn.get()])
+        #(fname, r2d=20, ih=True, mts=False separ='\t'):
         return data
     
     
@@ -283,97 +287,11 @@ class Window(tk.Frame):
             self.sepIn.set(r)
             self.conHeaders.set(h)
             window.destroy()
-        
-        '''def chooseSep():
-            print(self.sepIn.get())'''
-        
-        
-        def selSim4Life(window):
-            '''
-            Frame to define the parameters for a Sim4Life input file.
 
-            Parameters
-            ----------
-            window : tk.Toplevel
-                the window that it will be.
-
-            Returns
-            -------
-            None.
-
-            '''
-            # Delete previous holders that exist
-            for wid in window.grid_slaves():
-                wid.grid_forget()
-
-            # Set the Label to Sim4Life
-            self.inSourceLabel.set('Sim4Life')
-
-            # Create a new frame
-            rowsFrame = tk.Frame(window)
-            rowsFrame.grid(row=0, column=0)
-            
-            # Holders for the rows that need to be deleted
-            labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
-            txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
-    
-            # Frame for the separators
-            sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
-            sepFrame.grid(row=1, column=0, sticky='nesw')
-            
-            # Holders for the separators
-            label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
-            i=1
-            for sep, val in self.sepsNames.items():
-                #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
-                #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
-                tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
-                       value=sep).grid(row=i, column=0, sticky='w')
-                i += 1
-            
-        
-        def selOther(window):
-            '''
-            
-
-            Parameters
-            ----------
-            window : tk.Toplevel
-                the window that it will be.
-
-            Returns
-            -------
-            None.
-
-            '''
-            # Delete previous holders that exist
-            for wid in window.grid_slaves():
-                wid.grid_forget()
-            
-            # Set the Label to Other
-            self.inSourceLabel.set('Other')
-            
-            # Define if the input file contains headers
-            ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0).grid(row=1, column=0)
-            
-            # Frame for the separators
-            sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
-            sepFrame.grid(row=2, column=0, sticky='nesw')
-            
-            # Holders for the separators
-            label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
-            i=1
-            for sep, val in self.sepsNames.items():
-                #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
-                #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
-                tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
-                       value=sep).grid(row=i, column=0, sticky='w')
-                i += 1
-            
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
-        window.geometry('300x250')
+        window.geometry('170x225')
         
         # Initial values - for use in cancel button
         # Initial value of rows that need to be deleted (for Sim4Life file)
@@ -383,23 +301,39 @@ class Window(tk.Frame):
         # Initial headers
         initHeaders = self.conHeaders.get()
         
-        # LabelFrame based on selection
-        tmpLabel = tk.Label(window, textvariable=self.inSourceLabel)
-        labelFr = tk.LabelFrame(window, labelwidget=tmpLabel)
-        labelFr.grid(row=1, column=0)
-        selSim4Life(labelFr)
         
-        # Frame for radiobuttons
-        rbFrame = tk.Frame(window)
-        rbFrame.grid(row=0, column=0)
+        # Create a new frame
+        rowsFrame = tk.Frame(window)
+        rowsFrame.grid(row=0, column=0)
+        # Holders for the rows that need to be deleted
+        labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
+        txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
+
+        # Define if the input file contains headers
+        ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0)
+        ch1.grid(row=1, column=0)
+    
+        # Frame for the separators
+        sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+        sepFrame.grid(row=2, column=0, sticky='nesw')
         
-        # Radiobuttons - selection between Sim4Life and Other
-        rb1 = tk.Radiobutton(rbFrame, text='Sim4Life', variable=self.inSource, value=1, command=lambda:selSim4Life(labelFr)).grid(row=0, column=0)
-        rb2 = tk.Radiobutton(rbFrame, text='Other', variable=self.inSource, value=2, command=lambda: selOther(labelFr)).grid(row=0, column=1)
+        # Holders for the separators
+        label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+        i=1
+        for sep, val in self.sepsNames.items():
+            #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
+            #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+            tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
+                    value=sep).grid(row=i, column=0, sticky='w')
+            i += 1
+
+        # Repeating separator
+        ch1 = tk.Checkbutton(sepFrame, text='Repeating separator', variable=self.sepMulti , onvalue=True, offvalue=False)
+        ch1.grid(row=i, column=0)
         
         # Frame for OK and Cancel buttons
         butFrame = tk.Frame(window)
-        butFrame.grid(row=2,column=0)
+        butFrame.grid(row=4,column=0)
         
         # Cancel button
         quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initEntry, initRadio, initHeaders))
@@ -408,6 +342,184 @@ class Window(tk.Frame):
         # OK button
         okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
         okButton.grid(row=0, column=0)
+
+    # def openParams(self):
+    #     '''
+    #     Create a window to define the parameters of the imported file
+    #     (e.g. separator, if it contains headers)
+
+    #     Returns
+    #     -------
+    #     None.
+
+    #     '''
+        
+    #     def okBut(window):
+    #         '''
+    #         OK Button
+
+    #         Parameters
+    #         ----------
+    #         window : tk.Toplevel
+    #             the window that it will be.
+
+    #         Returns
+    #         -------
+    #         None.
+
+    #         '''
+    #         print(self.ird.get())
+    #         window.destroy()
+            
+    #     def cancelButton(window, e, r, h):
+    #         '''
+    #         Cancel button
+
+    #         Parameters
+    #         ----------
+    #         window : tk.Toplevel
+    #             the window that it will be.
+    #         e : int
+    #             Number of rows to delete.
+    #         r : string
+    #             initial separator.
+    #         h : int
+    #             If headers exist.
+
+    #         Returns
+    #         -------
+    #         None.
+
+    #         '''
+    #         self.ird.set(e)
+    #         self.sepIn.set(r)
+    #         self.conHeaders.set(h)
+    #         window.destroy()
+        
+    #     '''def chooseSep():
+    #         print(self.sepIn.get())'''
+        
+        
+    #     def selSim4Life(window):
+    #         '''
+    #         Frame to define the parameters for a Sim4Life input file.
+
+    #         Parameters
+    #         ----------
+    #         window : tk.Toplevel
+    #             the window that it will be.
+
+    #         Returns
+    #         -------
+    #         None.
+
+    #         '''
+    #         # Delete previous holders that exist
+    #         for wid in window.grid_slaves():
+    #             wid.grid_forget()
+
+    #         # Set the Label to Sim4Life
+    #         self.inSourceLabel.set('Sim4Life')
+
+    #         # Create a new frame
+    #         rowsFrame = tk.Frame(window)
+    #         rowsFrame.grid(row=0, column=0)
+            
+    #         # Holders for the rows that need to be deleted
+    #         labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
+    #         txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
+    
+    #         # Frame for the separators
+    #         sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+    #         sepFrame.grid(row=1, column=0, sticky='nesw')
+            
+    #         # Holders for the separators
+    #         label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+    #         i=1
+    #         for sep, val in self.sepsNames.items():
+    #             #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
+    #             #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+    #             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
+    #                    value=sep).grid(row=i, column=0, sticky='w')
+    #             i += 1
+            
+        
+    #     def selOther(window):
+    #         '''
+            
+
+    #         Parameters
+    #         ----------
+    #         window : tk.Toplevel
+    #             the window that it will be.
+
+    #         Returns
+    #         -------
+    #         None.
+
+    #         '''
+    #         # Delete previous holders that exist
+    #         for wid in window.grid_slaves():
+    #             wid.grid_forget()
+            
+    #         # Set the Label to Other
+    #         self.inSourceLabel.set('Other')
+            
+    #         # Define if the input file contains headers
+    #         ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0).grid(row=1, column=0)
+            
+    #         # Frame for the separators
+    #         sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
+    #         sepFrame.grid(row=2, column=0, sticky='nesw')
+            
+    #         # Holders for the separators
+    #         label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+    #         i=1
+    #         for sep, val in self.sepsNames.items():
+    #             #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
+    #             #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
+    #             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
+    #                    value=sep).grid(row=i, column=0, sticky='w')
+    #             i += 1
+            
+        
+    #     window = tk.Toplevel(self.parent)
+    #     window.title("Open Parameters")
+    #     window.geometry('300x250')
+        
+    #     # Initial values - for use in cancel button
+    #     # Initial value of rows that need to be deleted (for Sim4Life file)
+    #     initEntry = self.ird.get()
+    #     # Initial separator
+    #     initRadio = self.sepIn.get()
+    #     # Initial headers
+    #     initHeaders = self.conHeaders.get()
+        
+    #     # LabelFrame based on selection
+    #     tmpLabel = tk.Label(window, textvariable=self.inSourceLabel)
+    #     labelFr = tk.LabelFrame(window, labelwidget=tmpLabel)
+    #     labelFr.grid(row=1, column=0)
+    #     selSim4Life(labelFr)
+        
+    #     # Frame for radiobuttons
+    #     rbFrame = tk.Frame(window)
+    #     rbFrame.grid(row=0, column=0)
+        
+    #     # Radiobuttons - selection between Sim4Life and Other
+    #     rb1 = tk.Radiobutton(rbFrame, text='Sim4Life', variable=self.inSource, value=1, command=lambda:selSim4Life(labelFr)).grid(row=0, column=0)
+    #     rb2 = tk.Radiobutton(rbFrame, text='Other', variable=self.inSource, value=2, command=lambda: selOther(labelFr)).grid(row=0, column=1)
+        
+    #     # Frame for OK and Cancel buttons
+    #     butFrame = tk.Frame(window)
+    #     butFrame.grid(row=2,column=0)
+        
+    #     # Cancel button
+    #     quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initEntry, initRadio, initHeaders))
+    #     quitButton.grid(row=0, column=1)
+        
+    #     # OK button
+    #     okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
+    #     okButton.grid(row=0, column=0)
 
     def saveParams(self):
         '''
@@ -520,6 +632,9 @@ class Window(tk.Frame):
         pt = pdt.Table(frame)
         pt.model.df = tmp
         pt.show()
+        
+        if list(pt.model.df.columns)!=list(data.columns):
+            print(pt.model.df.columns)
         
         # Plot options
         framePlot = tk.LabelFrame(window, text='Plot')

@@ -29,9 +29,115 @@ def get_digits(str1):
             c.append(i)
     return c
 
+def readData(fname, r2d=20, ih=True, mts=False, separ='\t'):
+    print(r2d, ih, mts, separ)
+    # Parameters
+    #fname = filenames[0]
+    # r2d = 0 # Rows to delete
+    # ih = True # Includes headers
+    #mts = True # Multiple separators
+    comSym = ['%', '#', '//', '$']
+    #separators = [' ', '\t', ';', ',']
+    #separ = separators[0]
+    
+    # If headers are included either in rows that we want to delete
+    # or in a separate row
+    if ih:
+        # When no rows are to be deleted
+        if r2d==0:
+            # The following part is necessary for Comsol files
+            # Open the file and read the first two lines
+            # The first line is needed to extract the names of columns
+            # The second line is needed to validate the number of columns
+            with open(fname, encoding='utf-8') as myfile:
+                header = myfile.readline().strip('\n')
+                secondLine = myfile.readline().strip('\n')
+            # Split the lines properly
+            if separ in [' ', '\t']:
+                secondLine = secondLine.split()
+                header = ' '.join(header.split())
+            else:
+                secondLine = secondLine.split(separ)
+                header = ' '.join(header.split(separ))
+            # Remove unnecessary symbols
+            while (header[0] in comSym) or (header[0]==' '):
+                header = header[1:]
+            header = header.split()
+            # Check if the two lines have the same columns
+            tmpse = len(secondLine)
+            tmphe = len(header)
+            print(tmpse, tmphe)
+            if tmphe!=tmpse:
+                if tmpse>tmphe:
+                    for i in range(tmpse-tmphe):
+                        header.append('M{}'.format(i+1))
+                else:
+                    print('Problem')
+            # If there are multiple separators
+            if mts:
+                separ = '\s+'
+            data = pd.read_csv(fname, sep=separ, encoding='utf-8', dtype=np.float64, na_values=0.0, skiprows=1, names=header, header=None)
+            data = data.fillna(0.0)
+        else:
+            # The following part is necessary for Sim4Life files
+            # Read the first 20 lines to get the column labels    
+            with open(fname, encoding='utf-8') as myfile:
+                topfile = [next(myfile) for x in range(r2d)]
+            
+            # Remove { for top and } from bottom
+            topfile = topfile[1:-1] 
+            
+            # Acquire the headers names (based on Sim4Life file format)
+            heads = {}
+            for line in range(len(topfile)):
+                tmp = (topfile[line].strip('\n')).strip('#\t')
+                topfile[line] = tmp
+                fc = tmp.split(': ')[0]
+                sc = tmp.split(': ')[1]
+                if 'Field Quantity Units' in fc:
+                    unit = sc.strip('\"')
+                if 'Column' in tmp:       
+                    if 'Quantity' in fc:
+                        # Find the number of columns
+                        ds = get_digits(fc)
+                        # Find the name of columns
+                        sc = sc.strip('"')
+                        print(sc)
+                        if len(ds)>1:
+                            meg = sc.split(' ')
+                            meg1 = meg[0].split('/')[0]                  
+                            meg2 = meg[0].split('/')[1]
+                            megs = ['{}-{}'.format(meg1,meg[1]), '{}-{}'.format(meg2,meg[1])]
+                        else:
+                            megs = [sc]
+                        for i,j in zip(ds, megs):
+                            heads[i] = j
+            
+            headers = list(heads.values())
+            print(headers)
+            if mts:
+                separ = '\s+'
+            # Read the magnetic-field file    
+            data = pd.read_csv(fname, sep=separ, encoding='utf-8', dtype=np.float64, na_values=0.0, skiprows=r2d, names=headers, usecols=range(len(headers)))
+            data = data.fillna(0.0)
+            
+            # Im values are 0, so delete them
+            for name in headers:
+                if 'Im' in name:
+                    data.drop(name, inplace=True, axis=1)       
+    else: 
+        # If headers are not included or we do not want to include them
+        data = pd.read_csv(fname, sep=separ, encoding='utf-8', dtype=np.float64, na_values=0.0, skiprows=r2d, header=None)
+        data = data.fillna(0.0)
+        # Assign names to the columns
+        # The first 3 are named after the space dimensions x-y-z
+        data.rename(columns={0: 'x', 1: 'y', 2: 'z'}, inplace=True)
+        # Every next column is named after the letter M and a number
+        for i in range(3, len(data.columns)):
+            data.rename(columns={i: 'M{}'.format(i-2)}, inplace=True)
+    return data
 
-
-def readData(fname, initrows=20, separ='\t'):
+def readData2(fname, initrows=20, separ='\t'):
     '''
     Function to read the file when it is Sim4Life file.
 
