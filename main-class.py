@@ -14,7 +14,7 @@ import pandastable as pdt
 import datetime as dtm
 import dataplot as dpl
 
-import matplotlib.pyplot as plt
+## import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.figure import Figure
 
@@ -58,8 +58,8 @@ class Window(tk.Frame):
         # Define input file
         self.inSource = tk.IntVar()
         self.inSource.set(1)
-        self.inSourceLabel = tk.StringVar()
-        self.inSourceLabel.set('Sim4Life')
+        ## self.inSourceLabel = tk.StringVar()
+        ## self.inSourceLabel.set('Sim4Life')
         
         # Other file
         self.conHeaders = tk.IntVar() # Contains headers
@@ -80,24 +80,6 @@ class Window(tk.Frame):
         
         self.initUI()
 
-    def readFile(self, filename):
-        '''
-        Function to open the file that contains the Magnetic field data.
-
-        Parameters
-        ----------
-        filename : string
-            The name of the file that will be opened.
-
-        Returns
-        -------
-        data : pandas.DataFrame
-            Contains the input data (Magnetic field).
-        '''
-        data = cg.readData(filename, int(self.ird.get()), self.conHeaders.get(), self.sepMulti.get() ,self.seps[self.sepIn.get()])
-        return data
-    
-    
     def aboutMenu(self):
         '''
         Pops up a message box to inform about the creator of the software
@@ -106,9 +88,9 @@ class Window(tk.Frame):
         -------
         None.
         '''
-        tk.messagebox.showinfo("About", "This software has been created by Konstantinos Angelou!\nemail: angelou.konstantinos@gmail.com")
-    
-    
+        tk.messagebox.showinfo("About", "This software has been created by Konstantinos Angelou!\nemail: angelou.konstantinos@gmail.com")    
+
+
     def helpMenu(self):
         '''
         Creates a new window that informs the user on the steps that need to 
@@ -160,6 +142,24 @@ class Window(tk.Frame):
         self.log_area.configure(state='disabled')
 
 
+    def readFile(self, filename):
+        '''
+        Function to open the file that contains the Magnetic field data.
+
+        Parameters
+        ----------
+        filename : string
+            The name of the file that will be opened.
+
+        Returns
+        -------
+        data : pandas.DataFrame
+            Contains the input data (field).
+        '''
+        data = cg.readData(filename, int(self.ird.get()), self.conHeaders.get(), self.sepMulti.get() ,self.seps[self.sepIn.get()])
+        return data
+    
+
     def openFile(self):
         '''
         Function to open the input data. They are assigned to inData variable.
@@ -175,10 +175,7 @@ class Window(tk.Frame):
         tmp = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = ftypes)
         
         if tmp != '':
-            self.infile.set(tmp)
-            print(self.infile.get())
-            print('Now opening file...')
-            
+            self.infile.set(tmp)         
             self.updateLOG('Now opening file: {}'.format(tmp))
             try:
                 self.inData = self.readFile(tmp)
@@ -186,42 +183,8 @@ class Window(tk.Frame):
                 self.updateLOG('There was an error opening the file. Please check import parameters and try again.')
             else:
                 self.updateLOG('File is now open.')
-
-            print('Number of columns: {}'.format(len(self.inData.columns)))
-            print(self.inData.head(10))
         else:
             self.updateLOG('No file has been provided')
-
-    def saveFile(self):
-        '''
-        Function to save the gradients data into a file.
-
-        Returns
-        -------
-        None.
-
-        '''
-        if not self.gradData.empty:
-
-            self.updateLOG('Now saving file')
-
-            # Define file types
-            ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
-            tmp = filedialog.asksaveasfilename(defaultextension=('Text files', '*.txt'), initialdir = "/",title = "Select file",filetypes = ftypes)
-            if tmp != '':
-                self.outfile.set(tmp)
-                print(self.outfile.get())
-                # Write the data to the file
-                self.gradData.to_csv('{}.txt'.format(tmp.rstrip('.txt')), sep=self.seps[self.sepOut.get()], index=False)
-                self.updateLOG('File has been saved: {}'.format(tmp))
-
-                print('Number of columns: {}'.format(len(self.gradData.columns)))
-                print(self.gradData.head(20))
-            else:
-                self.updateLOG('No filename has been provided')
-        else:
-            self.updateLOG('No data to save')
-        
 
     def openParams(self):
         '''
@@ -248,7 +211,6 @@ class Window(tk.Frame):
             None.
 
             '''
-            print(self.ird.get())
             window.destroy()
             
         def cancelButton(window, e, r, h):
@@ -294,8 +256,10 @@ class Window(tk.Frame):
         rowsFrame = tk.Frame(window)
         rowsFrame.grid(row=0, column=0)
         # Holders for the rows that need to be deleted
-        labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
-        txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
+        labelRows = tk.Label(rowsFrame, text='Initial rows to delete')
+        labelRows.grid(row=0, column=0)      
+        txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6)
+        txtBox.grid(row=0, column=1) #entry textbox
 
         # Define if the input file contains headers
         ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0)
@@ -306,11 +270,10 @@ class Window(tk.Frame):
         sepFrame.grid(row=2, column=0, sticky='nesw')
         
         # Holders for the separators
-        label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+        label = tk.Label(sepFrame, text='Select separator:')
+        label.grid(row=0, column=0)
         i=1
         for sep, val in self.sepsNames.items():
-            #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
-            #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
                     value=sep).grid(row=i, column=0, sticky='w')
             i += 1
@@ -331,183 +294,36 @@ class Window(tk.Frame):
         okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
         okButton.grid(row=0, column=0)
 
-    # def openParams(self):
-    #     '''
-    #     Create a window to define the parameters of the imported file
-    #     (e.g. separator, if it contains headers)
+    def saveFile(self):
+        '''
+        Function to save the gradients data into a file.
 
-    #     Returns
-    #     -------
-    #     None.
+        Returns
+        -------
+        None.
 
-    #     '''
-        
-    #     def okBut(window):
-    #         '''
-    #         OK Button
+        '''
+        # Check if gradients have been calculated
+        if not self.gradData.empty:
+            self.updateLOG('Now saving file')
+            # Define file types
+            ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
+            tmp = filedialog.asksaveasfilename(defaultextension=('Text files', '*.txt'), initialdir = "/", title = "Select file",filetypes = ftypes)
+            if tmp != '':
+                self.outfile.set(tmp)
+                # Write the data to the file
+                try:
+                    self.gradData.to_csv('{}.txt'.format(tmp.rstrip('.txt')), sep=self.seps[self.sepOut.get()], index=False)
+                except:
+                    self.updateLog('There was an error trying to export gradients. Please try again.')
+                else:
+                    self.updateLOG('File has been saved: {}'.format(tmp))
+            else:
+                self.updateLOG('No filename has been provided')
+        else:
+            self.updateLOG('Gradient have not been calculated. No export of data.')
 
-    #         Parameters
-    #         ----------
-    #         window : tk.Toplevel
-    #             the window that it will be.
 
-    #         Returns
-    #         -------
-    #         None.
-
-    #         '''
-    #         print(self.ird.get())
-    #         window.destroy()
-            
-    #     def cancelButton(window, e, r, h):
-    #         '''
-    #         Cancel button
-
-    #         Parameters
-    #         ----------
-    #         window : tk.Toplevel
-    #             the window that it will be.
-    #         e : int
-    #             Number of rows to delete.
-    #         r : string
-    #             initial separator.
-    #         h : int
-    #             If headers exist.
-
-    #         Returns
-    #         -------
-    #         None.
-
-    #         '''
-    #         self.ird.set(e)
-    #         self.sepIn.set(r)
-    #         self.conHeaders.set(h)
-    #         window.destroy()
-        
-    #     '''def chooseSep():
-    #         print(self.sepIn.get())'''
-        
-        
-    #     def selSim4Life(window):
-    #         '''
-    #         Frame to define the parameters for a Sim4Life input file.
-
-    #         Parameters
-    #         ----------
-    #         window : tk.Toplevel
-    #             the window that it will be.
-
-    #         Returns
-    #         -------
-    #         None.
-
-    #         '''
-    #         # Delete previous holders that exist
-    #         for wid in window.grid_slaves():
-    #             wid.grid_forget()
-
-    #         # Set the Label to Sim4Life
-    #         self.inSourceLabel.set('Sim4Life')
-
-    #         # Create a new frame
-    #         rowsFrame = tk.Frame(window)
-    #         rowsFrame.grid(row=0, column=0)
-            
-    #         # Holders for the rows that need to be deleted
-    #         labelRows = tk.Label(rowsFrame, text='Initial rows to delete').grid(row=0, column=0)      
-    #         txtBox = tk.Entry(rowsFrame, textvariable = self.ird, width=6).grid(row=0, column=1) #entry textbox
-    
-    #         # Frame for the separators
-    #         sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
-    #         sepFrame.grid(row=1, column=0, sticky='nesw')
-            
-    #         # Holders for the separators
-    #         label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
-    #         i=1
-    #         for sep, val in self.sepsNames.items():
-    #             #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
-    #             #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
-    #             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn,  
-    #                    value=sep).grid(row=i, column=0, sticky='w')
-    #             i += 1
-            
-        
-    #     def selOther(window):
-    #         '''
-            
-
-    #         Parameters
-    #         ----------
-    #         window : tk.Toplevel
-    #             the window that it will be.
-
-    #         Returns
-    #         -------
-    #         None.
-
-    #         '''
-    #         # Delete previous holders that exist
-    #         for wid in window.grid_slaves():
-    #             wid.grid_forget()
-            
-    #         # Set the Label to Other
-    #         self.inSourceLabel.set('Other')
-            
-    #         # Define if the input file contains headers
-    #         ch1 = tk.Checkbutton(window, text='Contains headers', variable=self.conHeaders, onvalue=1, offvalue=0).grid(row=1, column=0)
-            
-    #         # Frame for the separators
-    #         sepFrame = tk.Frame(window, bd=1, highlightthickness=1, highlightbackground='black')
-    #         sepFrame.grid(row=2, column=0, sticky='nesw')
-            
-    #         # Holders for the separators
-    #         label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
-    #         i=1
-    #         for sep, val in self.sepsNames.items():
-    #             #tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
-    #             #       value=sep, command=chooseSep).grid(row=i, column=0, sticky='w')
-    #             tk.Radiobutton(sepFrame, text=val, variable=self.sepIn, 
-    #                    value=sep).grid(row=i, column=0, sticky='w')
-    #             i += 1
-            
-        
-    #     window = tk.Toplevel(self.parent)
-    #     window.title("Open Parameters")
-    #     window.geometry('300x250')
-        
-    #     # Initial values - for use in cancel button
-    #     # Initial value of rows that need to be deleted (for Sim4Life file)
-    #     initEntry = self.ird.get()
-    #     # Initial separator
-    #     initRadio = self.sepIn.get()
-    #     # Initial headers
-    #     initHeaders = self.conHeaders.get()
-        
-    #     # LabelFrame based on selection
-    #     tmpLabel = tk.Label(window, textvariable=self.inSourceLabel)
-    #     labelFr = tk.LabelFrame(window, labelwidget=tmpLabel)
-    #     labelFr.grid(row=1, column=0)
-    #     selSim4Life(labelFr)
-        
-    #     # Frame for radiobuttons
-    #     rbFrame = tk.Frame(window)
-    #     rbFrame.grid(row=0, column=0)
-        
-    #     # Radiobuttons - selection between Sim4Life and Other
-    #     rb1 = tk.Radiobutton(rbFrame, text='Sim4Life', variable=self.inSource, value=1, command=lambda:selSim4Life(labelFr)).grid(row=0, column=0)
-    #     rb2 = tk.Radiobutton(rbFrame, text='Other', variable=self.inSource, value=2, command=lambda: selOther(labelFr)).grid(row=0, column=1)
-        
-    #     # Frame for OK and Cancel buttons
-    #     butFrame = tk.Frame(window)
-    #     butFrame.grid(row=2,column=0)
-        
-    #     # Cancel button
-    #     quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initEntry, initRadio, initHeaders))
-    #     quitButton.grid(row=0, column=1)
-        
-    #     # OK button
-    #     okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
-    #     okButton.grid(row=0, column=0)
 
     def saveParams(self):
         '''
@@ -534,7 +350,6 @@ class Window(tk.Frame):
             None.
 
             '''
-            print(self.sepOut.get())
             window.destroy()
             
         def cancelButton(window, r):
@@ -568,7 +383,8 @@ class Window(tk.Frame):
         sepFrame.grid(row=0, column=0, sticky='nesw')
         
         # Holders for the separators
-        label = tk.Label(sepFrame, text='Select separator:').grid(row=0, column=0)
+        label = tk.Label(sepFrame, text='Select separator:')
+        label.grid(row=0, column=0)
         i = 1
         for sep, val in self.sepsNames.items():
             #tk.Radiobutton(sepFrame, text=val, variable=self.sepOut, 
@@ -605,6 +421,142 @@ class Window(tk.Frame):
 
         '''
         
+        def myPlot(data, zax, uaxis, scale, cslice):
+            '''
+            Function to plot the data
+
+            Parameters
+            ----------
+            data : pandas.DataFrame
+                data to plot.
+            zax : string
+                z-axis.
+            uaxis : string
+                the 2 dimensions that we plot.
+            scale : string
+                linear or log.
+            cslice : int
+                the slice of the 3rd axis that we plot.
+
+            Returns
+            -------
+            None
+
+            '''
+            def createFig():
+                '''
+                Function to create a figure and a canvas
+
+                Returns
+                -------
+                fig : Figure
+                    DESCRIPTION.
+                canvas : Canvas
+                    DESCRIPTION.
+
+                '''
+                fig = Figure(dpi=80)
+                fig.set_size_inches(6.5, 5.2)
+                canvas = FigureCanvasTkAgg(fig, master=frameFig)
+                canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
+                return fig, canvas
+            
+            def UpdateButton(uaxis, zax, cslice, data, scale):
+                '''
+                Function to plot new slices
+
+                Parameters
+                ----------
+                uaxis : string
+                    the 2 dimensions that we plot..
+                zax : string
+                    z-axis.
+                cslice : int
+                    the slice of the 3rd axis that we plot.
+                data : pandas.DataFrame
+                    data to plot.
+                scale : string
+                    linear or log.
+
+                Returns
+                -------
+                None.
+
+                '''
+                self.fig.clf() # Clear previous items
+                self.fig, canvas = createFig()
+                ax = self.fig.subplots()
+                dpl.createPlot(self.fig, ax, uaxis, zax, cslice, data, scale)
+                canvas.draw()
+                
+                
+            def savePlot():
+                '''
+                Function to save the figure
+
+                Returns
+                -------
+                None.
+
+                '''
+                ftypes = [('JPG', '*.jpg'), ('JPEG', '*.jpeg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('PDF', '*.pdf'), ('All files', '*')]
+                tmp = filedialog.asksaveasfilename(defaultextension=('JPG', '*.jpg'), initialdir = "/", title = "Select file", filetypes = ftypes)
+                if tmp != '':
+                    #dpl.saveFig(self.fig, tmp)
+                    cformat = tmp.split('.')[-1]
+                    fname = ".".join(tmp.split('.')[:-1])
+                    self.fig.savefig('{}.{}'.format(fname, cformat), format=cformat, dpi=300, bbox_inches='tight')
+            
+            # Figure
+            window = tk.Toplevel(self.parent)
+            window.title('Figure')
+            
+            # Slider
+            frameSlice = tk.LabelFrame(window, text='Slice')
+            frameSlice.grid(row=0, column=0, columnspan=3)
+
+            # Identify the 3rd dimension, whose slice we get
+            tmpDimList = [str(data.columns[0]), str(data.columns[1]), str(data.columns[2])]
+            tmpDimList.remove(uaxis.split('-')[0])
+            tmpDimList.remove(uaxis.split('-')[1])
+            
+            # Get the number of slices that exist
+            limits = set(list(data[tmpDimList[0]]))
+            
+            # Create slider
+            cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
+            cslider.grid()
+            
+            # Frame for the figure
+            frameFig = tk.Frame(window)
+            frameFig.grid(row=1, column=0, columnspan=3)
+            
+            # Create figure
+            self.fig, canvas = createFig()        
+            ax = self.fig.subplots()
+            
+            # Plot
+            dpl.createPlot(self.fig, ax, uaxis, zax, 0, data, scale)
+            
+            # Update button
+            updateBut = tk.Button(frameSlice, text='Update plot', command=lambda:UpdateButton(uaxis, zax, cslider.get(), data, scale))
+            updateBut.grid(row=0, column=4)
+            
+            canvas.draw()
+            
+            # Frame for matplotlib toolbar
+            frameToolbar = tk.Frame(master=window)
+            frameToolbar.grid(row=2,column=0)
+            
+            # Matplotlib toolbar
+            toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
+            toolbar.grid(row=0, column=0, columnspan=2)
+            
+            # Save button
+            b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(), width=20)
+            b2.grid(row=0, column=2)
+
+        
         window = tk.Toplevel(self.parent)
         window.title("Check Input Data")
         window.geometry('600x400')
@@ -620,10 +572,7 @@ class Window(tk.Frame):
         pt = pdt.Table(frame)
         pt.model.df = tmp
         pt.show()
-        
-        if list(pt.model.df.columns)!=list(data.columns):
-            print(pt.model.df.columns)
-        
+                
         # Plot options
         framePlot = tk.LabelFrame(window, text='Plot')
         framePlot.grid(row=1, column=0, columnspan=4)
@@ -631,110 +580,40 @@ class Window(tk.Frame):
         # Variable for Z axis
         myVar = tk.StringVar()
         myVar.set('')
-        
+              
+        tmptext = []
+        plotEnabled = 'normal'
+        # In case no data have been imported
         if len(data)==0:
-            options = ['1', '2', '3']
+            options = ['']
+            tmptext.extend(['x-y', 'x-z', 'y-z'])
+            plotEnabled = 'disabled'
         else:
             options = list(data.columns[3:])
-        print(options)
+            # Create pairs of coordinates
+            for i in range(3):
+                for j in range(i+1,3):
+                    tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
+
         myVar.set(options[0])
+        
+        # Choose which Dimension to plot
+        frameDim = tk.LabelFrame(framePlot, text='Plane')
+        frameDim.grid(row=0, column=2)
+        for num in range(3):            
+            tk.Radiobutton(frameDim, text=tmptext[num], variable=self.dataDim, value=num, state=plotEnabled).grid(row=0, column=num, sticky='w')
+        
+        # Choose z-axis
         zLabel = tk.Label(framePlot, text='Choose z-Axis: ')
         zLabel.grid(row=0, column=0)
         w = tk.OptionMenu(framePlot, myVar, *options)
         w.grid(row=0, column=1)
 
-        # Choose which Dimension to plot
-        frameDim = tk.LabelFrame(framePlot, text='Plane')
-        frameDim.grid(row=0, column=2)
-        """for num, (key, val) in enumerate(self.dataDimDict.items()):
-            tk.Radiobutton(frameDim, text=val, variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')"""
-        tmptext = []
-        for i in range(3):
-            for j in range(i+1,3):
-                tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
-        for num in range(3):            
-            tk.Radiobutton(frameDim, text=tmptext[num], variable=self.dataDim, value=num).grid(row=0, column=num, sticky='w')
-        
-        def myPlot(data, yax, uaxis, scale, cslice):
-            print(yax)
-            print(uaxis)
-            
-            # Figure
-            window = tk.Toplevel(self.parent)
-            window.title('Figure')
-            
-            # Slider
-            frameSlice = tk.LabelFrame(window, text='Slice')
-            frameSlice.grid(row=0, column=0, columnspan=3)
-            """tmpDimList = ['x', 'y', 'z']
-            tmpDim = self.dataDimDict[self.dataDim.get()]"""
-            tmpDimList = [str(data.columns[0]), str(data.columns[1]), str(data.columns[2])]
-            tmptext = []
-            for i in range(3):
-                for j in range(i+1,3):
-                    tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
-            tmpDim = tmptext[self.dataDim.get()]      
-            print(tmpDim)
-            tmpDimList.remove(tmpDim.split('-')[0])
-            tmpDimList.remove(tmpDim.split('-')[1])
-            
-            if len(data)!=0:
-                limits = set(list(data[tmpDimList[0]]))
-                cslider = tk.Scale(frameSlice, from_=0, to=len(limits)-1, orient=tk.HORIZONTAL)
-            else:
-                cslider = tk.Scale(frameSlice, from_=0, to=20, orient=tk.HORIZONTAL)
-            cslider.grid()
-                
-            def createFig():
-                fig = Figure(dpi=80)
-                fig.set_size_inches(6.5, 5.2)
-                canvas = FigureCanvasTkAgg(fig, master=frameFig)
-                canvas.get_tk_widget().grid(row=0,column=0, columnspan=3)
-                return fig, canvas
-            
-            frameFig = tk.Frame(window)
-            frameFig.grid(row=1, column=0, columnspan=3)
-            
-            self.fig, canvas = createFig()
-            
-            ax = self.fig.subplots()
-            
-            #def UpdateButton(fig, ax, uaxis, yax, cslice, data, scale):
-            def UpdateButton(uaxis, yax, cslice, data, scale):
-                self.fig.clf()
-                self.fig, canvas = createFig()
-                ax = self.fig.subplots()
-                dpl.createPlot(self.fig, ax, uaxis, yax, cslice, data, scale)
-                canvas.draw()
-            
-            
-            dpl.createPlot(self.fig, ax, uaxis, yax, cslider.get(), data, scale)
-            
-            updateBut = tk.Button(frameSlice, text='Update plot', command=lambda:UpdateButton(uaxis, yax, cslider.get(), data, scale))
-            updateBut.grid(row=0, column=4)
-            
-            canvas.draw()
-            frameToolbar = tk.Frame(master=window)
-            frameToolbar.grid(row=2,column=0)
-            toolbar= NavigationToolbar2Tk(canvas, frameToolbar)
-            toolbar.grid(row=0, column=0, columnspan=2)
-            
-            def savePlot():
-                ftypes = [('JPG', '*.jpg'), ('JPEG', '*.jpeg'), ('PNG', '*.png'), ('EPS', '*.eps'), ('TIFF', '*.tiff'), ('PDF', '*.pdf'), ('All files', '*')]
-                tmp = filedialog.asksaveasfilename(defaultextension=('JPG', '*.jpg'), initialdir = "/", title = "Select file", filetypes = ftypes)
-                if tmp != '':
-                    dpl.saveFig(self.fig, tmp)
-            
-            #b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(fig), width=20)
-            b2 = tk.Button(frameToolbar, text='Save', command=lambda:savePlot(), width=20)
-            b2.grid(row=0, column=2)
-
-            
-        # Buttons to plot and save
+        # Button to plot
         frameBut = tk.Frame(framePlot)
         frameBut.grid(row=0, column=4)
-        #b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), self.dataDimDict[self.dataDim.get()], 'linear', 0))
-        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), tmptext[self.dataDim.get()], 'linear', 0))
+
+        b1 = tk.Button(frameBut, text='Plot', command=lambda: myPlot(data, myVar.get(), tmptext[self.dataDim.get()], 'linear', 0), state=plotEnabled)
         b1.grid(row=0, column=0)
 
 
@@ -752,29 +631,21 @@ class Window(tk.Frame):
         # Check if the imported data is empty
         if not self.inData.empty:
             self.updateLOG('Now calculating gradients')
-            print('Now calculating gradients.')
-            # Check if the imported data is of the proper format
-            self.gradData = cg.Grads(self.inData)
-            self.updateLOG('Gradients have been calculated')
-            print('They have been calculated')
-            print(self.gradData.head(10))
-            '''if len(self.inData.columns)==4 or len(self.inData.columns)==6:
+            try:                
+                # Calculate gradients
                 self.gradData = cg.Grads(self.inData)
-                self.updateLOG('Gradients have been calculated')
-                print('They have been calculated')
-                print(self.gradData.head(10))
+            except:
+                self.updateLOG('There was a problem in calculating the gradients. Please try again.')
             else:
-                self.updateLOG('ERROR!!!Check Help->Information for proper input files!')'''
+                self.updateLOG('Gradients have been calculated')
         else:
             self.updateLOG('!!!No input data!!!')
 
-    
-        
-        
+
 
     def initUI(self):
         '''
-        Initialize all the buttons, menus etc.
+        Initialize the main window.
 
         Returns
         -------
