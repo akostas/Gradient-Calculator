@@ -94,22 +94,7 @@ class Window(tk.Frame):
         data : pandas.DataFrame
             Contains the input data (Magnetic field).
         '''
-        # if self.inSource.get() == 1:
-        #     data = cg.readData(filename, int(self.ird.get()), self.seps[self.sepIn.get()])
-        # else:
-        #     if self.conHeaders.get()==1:
-        #         data = pd.read_csv(filename, sep=self.seps[self.sepIn.get()], encoding='utf8')
-        #     else:
-        #         data = pd.read_csv(filename, header=None, sep=self.seps[self.sepIn.get()], encoding='utf8')
-        #         cols = len(data.columns)
-        #         if cols==4:
-        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'B'}, inplace=True)
-        #         elif cols==6:
-        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz'}, inplace=True)
-        #         elif cols==7:
-        #             data.rename(columns={0: 'x', 1: 'y', 2: 'z', 3: 'Bx', 4: 'By', 5: 'Bz', 6: 'B'}, inplace=True)
         data = cg.readData(filename, int(self.ird.get()), self.conHeaders.get(), self.sepMulti.get() ,self.seps[self.sepIn.get()])
-        #(fname, r2d=20, ih=True, mts=False separ='\t'):
         return data
     
     
@@ -195,9 +180,12 @@ class Window(tk.Frame):
             print('Now opening file...')
             
             self.updateLOG('Now opening file: {}'.format(tmp))
-
-            self.inData = self.readFile(tmp)       
-            self.updateLOG('File is now open.')
+            try:
+                self.inData = self.readFile(tmp)
+            except:
+                self.updateLOG('There was an error opening the file. Please check import parameters and try again.')
+            else:
+                self.updateLOG('File is now open.')
 
             print('Number of columns: {}'.format(len(self.inData.columns)))
             print(self.inData.head(10))
