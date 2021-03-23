@@ -11,41 +11,6 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
-"""def check3D(data):
-    '''
-    Function to check whether a column is already a slice.
-    (Comsol file exports a slice of the z axis)
-    If a column contains the same number then it returns the number of this column.
-    If there are more such columns, then there is a problem
-
-    Parameters
-    ----------
-    data : pandas DataFrame
-        the input file.
-
-    Returns
-    -------
-    None.
-
-    '''
-    # List that contains true or false for each column.
-    # True indicates that a column is a slice (all numbers of the column are the same number)
-    tmplist = []
-    for i in range(3):
-        tmplist.append(data.iloc[:,i].eq(data.iloc[:,i].iloc[i]).all())
-    
-    # If more columns are true, then there is a problem with the input file
-    if tmplist.count(True) > 1:
-        print("Houston, we've got problem!!!!!")
-    # Identify the number of column 
-    mind = tmplist.index(True)
-"""
-
-def reduceGridSize():
-    pass
-
-
-
 def createGrid(data, x, y, gB, scale='linear'):
     '''
     Function to create a grid required for the plotting

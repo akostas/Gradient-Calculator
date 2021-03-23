@@ -107,7 +107,7 @@ class Window(tk.Frame):
         window.rowconfigure(0, weight=1)
         
         
-        helptext = "This software is used to calculate the gradients of the magnetic field using the exported file from Sim4Life.The steps to calculate the gradients are the following:\n\t1) Import Parameters: Define the characteristics of the input file. First select if it is a Sim4Life file and leave the default parameters. If it is not a Sim4Life file, then select 'Other'. If the file includes headers, then check 'Contains headers', else un-check it. You should also select the proper separator between the columns.\n\t2) Open File: Choose the file with the data that need to be imported. The data must contain 4 or 6 columns. The first 3 columns are the three dimensions (x,y,z). If there are 4 columns, the 4th column is the absolute value of the vector. If there are 6 columns, the last 3 columns are the magnetic field in each direction (x,y,z).\n\t3) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly.\n\t4) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n\t5) Check Gradient Data: A table shows the first 10 lines to check whether the gradients have been calculated correctly.\n\t6) Save Parameters: Define the characteristics of the output file (e.g. column separator).\n\t7) Save File: Save the gradients into a text file.\n"
+        helptext = "This software is used to calculate the gradients of a 3D field. The steps to calculate the gradients are the following:\n\t1) Open file: Define the characteristics of the input file. First select the number of rows that need to be deleted. Default is 20, which is the appropriate for some Sim4Life files. If the file includes headers, then check 'Contains headers', else un-check it. You should also select the proper separator between the columns. Finally, press 'Open file' and select the proper file. The data must contain 3 coordinates columns (the first three columns) and the rest (any of them) are the components of the field. \n\t2) Check Data: A table shows the first 10 lines to check whether the data have been imported correctly. The data may also be plotted here. \n\t3) Calculate Gradients: Calculate the gradients in every direction using the gradient function from numpy library.\n\t4) Check Gradient Data: A table shows the first 10 lines to check whether the gradients have been calculated correctly. The gradients may also be plotted here.\n\t5) Save File: Define the characteristics of the output file (i.e. column separator) and press 'Save file'."
         
         
         label = st.ScrolledText(window, wrap=tk.WORD, width=72, height=25, font=("Times New Roman", 16) )
@@ -160,7 +160,7 @@ class Window(tk.Frame):
         return data
     
 
-    def openFile(self):
+    def openFile(self, window):
         '''
         Function to open the input data. They are assigned to inData variable.
 
@@ -169,6 +169,7 @@ class Window(tk.Frame):
         None.
 
         '''
+        window.destroy()
         # Define file types
         ftypes = [('Text files', '*.txt'), ('CSV files', '*.csv'), ('Dat files', '*.dat'), ('All files', '*')]
         # Open the file        
@@ -241,7 +242,7 @@ class Window(tk.Frame):
         
         window = tk.Toplevel(self.parent)
         window.title("Open Parameters")
-        window.geometry('170x225')
+        window.geometry('200x225')
         
         # Initial values - for use in cancel button
         # Initial value of rows that need to be deleted (for Sim4Life file)
@@ -290,11 +291,15 @@ class Window(tk.Frame):
         quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initEntry, initRadio, initHeaders))
         quitButton.grid(row=0, column=1)
         
+        # Open file button
+        openButton = tk.Button(butFrame, text="Open File", command=lambda:self.openFile(window), width=15)
+        openButton.grid(row=0, column=0)
+        
         # OK button
-        okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
-        okButton.grid(row=0, column=0)
+        # okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
+        # okButton.grid(row=0, column=0)
 
-    def saveFile(self):
+    def saveFile(self, window):
         '''
         Function to save the gradients data into a file.
 
@@ -303,6 +308,7 @@ class Window(tk.Frame):
         None.
 
         '''
+        window.destroy()
         # Check if gradients have been calculated
         if not self.gradData.empty:
             self.updateLOG('Now saving file')
@@ -401,9 +407,13 @@ class Window(tk.Frame):
         quitButton = tk.Button(butFrame, text='Cancel', command=lambda : cancelButton(window, initRadio))
         quitButton.grid(row=0, column=1)
 
+        # Saved file button
+        saveButton = tk.Button(butFrame, text="Save file", command=lambda: self.saveFile(window), width=15)
+        saveButton.grid(row=0, column=0)
+
         # OK button
-        okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
-        okButton.grid(row=0, column=0)
+        # okButton = tk.Button(butFrame, text="OK", command=lambda: okBut(window))
+        # okButton.grid(row=0, column=0)
 
     def checkData(self, data):
         '''
@@ -662,7 +672,7 @@ class Window(tk.Frame):
         self.parent.config(menu=menubar)
         # File menu
         fileMenu = tk.Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="Open", command=self.openFile)
+        #fileMenu.add_command(label="Open", command=self.openFile)
         fileMenu.add_command(label='Exit', command=self.parent.destroy)
         menubar.add_cascade(label="File", menu=fileMenu)    
         # Settings menu
@@ -681,12 +691,9 @@ class Window(tk.Frame):
         mrow = 0
         
         # Open parameters button
-        openParBut = tk.Button(self.parent, text="Import Parameters", command=self.openParams, width=15)
+        openParBut = tk.Button(self.parent, text="Open file", command=self.openParams, width=15)
         openParBut.grid(row=mrow, column=0)
         
-        # Open file button
-        openButton = tk.Button(self.parent, text="Open File", command=self.openFile, width=15)
-        openButton.grid(row=mrow, column=1)
         
         # Check input data button (if data have been inserted correctly)
         checkDataButton = tk.Button(self.parent, text="Check Data", command=lambda : self.checkData(self.inData), width=15)
@@ -699,13 +706,9 @@ class Window(tk.Frame):
         # Check gradients data button
         checkGradButton = tk.Button(self.parent, text="Check Gradient Data", command=lambda : self.checkData(self.gradData), width=15)
         checkGradButton.grid(row=mrow + 1, column=1)
-        
-        # Saved file button
-        saveButton = tk.Button(self.parent, text="Save file", command=self.saveFile, width=15)
-        saveButton.grid(row=mrow + 2, column=2)
 
         # Save parameters button
-        saveParBut = tk.Button(self.parent, text="Save Parameters", command=self.saveParams, width=15)
+        saveParBut = tk.Button(self.parent, text="Save File", command=self.saveParams, width=15)
         saveParBut.grid(row=mrow + 2, column=0)
         
 
