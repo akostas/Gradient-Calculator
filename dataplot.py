@@ -11,12 +11,108 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
+"""def check3D(data):
+    '''
+    Function to check whether a column is already a slice.
+    (Comsol file exports a slice of the z axis)
+    If a column contains the same number then it returns the number of this column.
+    If there are more such columns, then there is a problem
+
+    Parameters
+    ----------
+    data : pandas DataFrame
+        the input file.
+
+    Returns
+    -------
+    None.
+
+    '''
+    # List that contains true or false for each column.
+    # True indicates that a column is a slice (all numbers of the column are the same number)
+    tmplist = []
+    for i in range(3):
+        tmplist.append(data.iloc[:,i].eq(data.iloc[:,i].iloc[i]).all())
+    
+    # If more columns are true, then there is a problem with the input file
+    if tmplist.count(True) > 1:
+        print("Houston, we've got problem!!!!!")
+    # Identify the number of column 
+    mind = tmplist.index(True)
+"""
+
+def reduceGridSize():
+    pass
+
+
+
 def createGrid(data, x, y, gB, scale='linear'):
+    '''
+    Function to create a grid required for the plotting
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        the data that we need to plot.
+    x : string
+        name of the x axis.
+    y : string
+        name of the y axis.
+    gB : string
+        name of the Z axis.
+    scale : string, optional
+        linear or logarithmic. The default is 'linear'.
+
+    Returns
+    -------
+    np.array
+        Returns 3 np.arrays. One for x, one for y and one for Z axis.
+
+    '''
+    def r2(f, p=0.001):
+        '''
+        Function to reduce decimal points, without rounding.
+
+        Parameters
+        ----------
+        f : float
+            the number to reduce.
+        p : fload, optional
+            Indicates the decimal point that we need. The default is 0.001.
+
+        Returns
+        -------
+        float
+            The new number with the desired decimal points.
+
+        '''
+        if f>0:
+            return f - f%p
+        elif f<0:
+            return f + abs(f)%p
+        else:
+            return 0.0
+        
+    # Check the length of the series and reduce it by reducing the decimal 
+    # number of the coordinates
+    if len(set(data[x]))>500 or len(set(data[y]))>500:
+        for i in range(3):
+            data[data.columns[i]] = data[data.columns[i]].apply(r2)
+    # Remove the duplicates that occur from the decimal reduction
+    data.drop_duplicates(subset=[data.columns[i] for i in range(3)], keep='first', inplace=True)         
+    # Z values container
     newZ = []
+    # Iterate over y axis
     for j in sorted(list(set(data[y]))):
         arrayz = []
+        # Iterate over x axis
         for i in sorted(list(set(data[x]))):
-            value = list(data[ (data[x]==i) & (data[y]==j)][gB])[0]           
+            # Get the value if it exists, else set the value zero
+            try:
+                value = list(data[ (data[x]==i) & (data[y]==j)][gB])[0]
+            except:
+                value = 0.0
+            # Get the value in the desired scale (linear or logarithmic)
             if scale=='linear':
                 arrayz.append(value)
             else:
@@ -28,26 +124,48 @@ def createGrid(data, x, y, gB, scale='linear'):
     X, Y, Z =  mx, my, np.array(newZ)
     return X, Y, Z
 
-def saveFig(fig, filename):
-    cformat = filename.split('.')[-1]
-    fname = ".".join(filename.split('.')[:-1])
-    fig.savefig('{}.{}'.format(fname, cformat), format=cformat, dpi=300, bbox_inches='tight')
-
 
 def createPlot(fig, ax, uaxis, gB, cslice, data, scale='linear'):
- 
-    tmp = ['x', 'y', 'z']
+    '''
+    Function to plot the data.
+
+    Parameters
+    ----------
+    fig : figure
+        DESCRIPTION.
+    ax : axis
+        DESCRIPTION.
+    uaxis : string
+        the names of the x and y axis.
+    gB : string
+        name of z axis.
+    cslice : integer
+        the slice of z axis that we want to plot.
+    data : pandas.DataFrame
+        the data that we want to plot.
+    scale : string, optional
+        linear or logarithmic. The default is 'linear'.
+
+    Returns
+    -------
+    None.
+
+    '''
+
+    # Identify the 3rd dimension, whose slice we get
+    tmpDimList = [str(data.columns[0]), str(data.columns[1]), str(data.columns[2])]
     x = uaxis.split('-')[0]
     y = uaxis.split('-')[1]
-    
-    tmp.remove(x)
-    tmp.remove(y)
+    tmpDimList.remove(x)
+    tmpDimList.remove(y)
+
+    data.sort_values(by=[tmpDimList[0], y, x], inplace=True)
+
     # Select the incision plane and take the unique values
-    stableZ = tmp[0]
+    stableZ = tmpDimList[0]
     tmplist = sorted(list(set(data[stableZ])))
     # Select a specific slice of the incision plane (here is the middle one)
     data2 = data[data[stableZ]==tmplist[cslice]]
-    
     # Create the meshgrid
     X, Y, Z =  createGrid(data2, x, y, gB, scale)
     

@@ -592,15 +592,17 @@ class Window(tk.Frame):
             options = list(data.columns[3:])
             # Create pairs of coordinates
             for i in range(3):
-                for j in range(i+1,3):
-                    tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
+                if not data.iloc[:,i].eq(data.iloc[:,i].iloc[0]).all():
+                    for j in range(i+1,3):
+                        if not data.iloc[:,j].eq(data.iloc[:,j].iloc[0]).all():
+                            tmptext.append('{}-{}'.format(data.columns[i], data.columns[j]))
 
         myVar.set(options[0])
         
         # Choose which Dimension to plot
         frameDim = tk.LabelFrame(framePlot, text='Plane')
         frameDim.grid(row=0, column=2)
-        for num in range(3):            
+        for num in range(len(tmptext)):            
             tk.Radiobutton(frameDim, text=tmptext[num], variable=self.dataDim, value=num, state=plotEnabled).grid(row=0, column=num, sticky='w')
         
         # Choose z-axis

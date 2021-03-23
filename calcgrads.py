@@ -275,6 +275,8 @@ def Grads(data):
     
     # Calculate gradients for every direction
     for item in sorval:
-        grad = pd.concat([grad, cgrad(item, data)], axis=1, ignore_index=False)
+        # Check whether the column contains just one number
+        if not data[item[1]].eq(data[item[1]].iloc[0]).all():
+            grad = pd.concat([grad, cgrad(item, data)], axis=1, ignore_index=False)
 
     return grad
