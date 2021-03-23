@@ -189,12 +189,12 @@ def createPlot(fig, ax, uaxis, gB, cslice, data, scale='linear'):
     # Plot
     psm = ax.pcolormesh(X,Y,Z,  cmap=newcmap, norm=norm, shading='auto')
     ax.set_facecolor('xkcd:black')
-    ax.set_xlabel('{}(m)'.format(x), fontsize=26)
-    ax.set_ylabel('{}(m)'.format(y), fontsize=26)
+    ax.set_xlabel('{}'.format(x), fontsize=26)
+    ax.set_ylabel('{}'.format(y), fontsize=26)
     if scale=='linear':
-        fig.colorbar(psm, ax=ax).set_label(label='{}(T/m)'.format(gB), size=20)
+        fig.colorbar(psm, ax=ax).set_label(label='{}'.format(gB), size=20)
     else:
-        fig.colorbar(psm, ax=ax).set_label(label='{}(db)'.format(gB), size=20)
+        fig.colorbar(psm, ax=ax).set_label(label='{}'.format(gB), size=20)
     fig.tight_layout()
     
 

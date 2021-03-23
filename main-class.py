@@ -558,7 +558,7 @@ class Window(tk.Frame):
 
         
         window = tk.Toplevel(self.parent)
-        window.title("Check Input Data")
+        window.title("Check Data")
         window.geometry('600x400')
         
         # Frame for the printing
