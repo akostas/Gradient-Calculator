@@ -677,10 +677,10 @@ class Window(tk.Frame):
         menubar.add_cascade(label="File", menu=fileMenu)    
         # Settings menu
         settingsMenu = tk.Menu(self.parent, tearoff=0)
-        settingsMenu.add_command(label='Import parameters', command=self.openParams)
+        #settingsMenu.add_command(label='Import parameters', command=self.openParams)
         settingsMenu.add_command(label='Check Input data', command=lambda : self.checkData(self.inData))
         settingsMenu.add_command(label='Check Gradient data', command=lambda : self.checkData(self.gradData))
-        settingsMenu.add_command(label='Save parameters', command=self.saveParams)
+        #settingsMenu.add_command(label='Save parameters', command=self.saveParams)
         menubar.add_cascade(label="Settings", menu=settingsMenu)   
         # Information menu
         aboutMenu = tk.Menu(self.parent, tearoff=0)
@@ -688,10 +688,10 @@ class Window(tk.Frame):
         aboutMenu.add_command(label='About', command=self.aboutMenu)
         menubar.add_cascade(label="Information", menu=aboutMenu)   
         
-        mrow = 0
+        mrow = 1
         
         # Open parameters button
-        openParBut = tk.Button(self.parent, text="Open file", command=self.openParams, width=15)
+        openParBut = tk.Button(self.parent, text="Open File", command=self.openParams, width=15)
         openParBut.grid(row=mrow, column=0)
         
         
@@ -708,8 +708,8 @@ class Window(tk.Frame):
         checkGradButton.grid(row=mrow + 1, column=1)
 
         # Save parameters button
-        saveParBut = tk.Button(self.parent, text="Save File", command=self.saveParams, width=15)
-        saveParBut.grid(row=mrow + 2, column=0)
+        saveParBut = tk.Button(self.parent, text="Save Gradients", command=self.saveParams, width=15)
+        saveParBut.grid(row=mrow + 1, column=2)
         
 
 def main():
